@@ -1,0 +1,55 @@
+{
+  "name": "cronusfit-web",
+  "version": "0.1.0",
+  "description": "CronusFit automated catalog and exhibition website platform",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "build:site": "npx @11ty/eleventy --config=exhibition-site/.eleventy.cjs",
+    "build:css": "npx tailwindcss -c exhibition-site/tailwind.config.cjs -i exhibition-site/assets/css/main.css -o exhibition-site/_site/assets/css/main.css --minify",
+    "build:admin-css": "npx tailwindcss -c exhibition-site/tailwind.config.cjs -i admin/css/admin.src.css -o admin/css/admin.css --minify",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:property": "vitest run --grep property",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "deploy:admin": "npm run build:admin-css && node scripts/build-lambdas.mjs && aws s3 sync ./admin s3://cronusfit-exhibition-site-prod/admin/ --delete --region us-east-1 && aws cloudfront create-invalidation --distribution-id EKSSI9LYAOBGP --paths /admin/*"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.0",
+    "@types/aws-lambda": "^8.10.162",
+    "@types/node": "^20.19.43",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "autoprefixer": "^10.4.0",
+    "aws-sdk-client-mock": "^4.1.0",
+    "eslint": "^8.57.0",
+    "fast-check": "^3.19.0",
+    "postcss": "^8.4.0",
+    "prettier": "^3.2.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudfront": "^3.1093.0",
+    "@aws-sdk/client-cloudwatch": "^3.1093.0",
+    "@aws-sdk/client-dynamodb": "^3.637.0",
+    "@aws-sdk/client-lambda": "^3.1093.0",
+    "@aws-sdk/client-s3": "^3.1093.0",
+    "@aws-sdk/client-secrets-manager": "^3.637.0",
+    "@aws-sdk/client-ses": "^3.1093.0",
+    "@aws-sdk/lib-dynamodb": "^3.637.0",
+    "@aws-sdk/s3-request-presigner": "^3.1093.0",
+    "@svgdotjs/svg.js": "^3.2.0",
+    "@types/sharp": "^0.31.1",
+    "jose": "^6.2.4",
+    "sharp": "^0.35.3",
+    "svgdom": "0.1.19"
+  }
+}

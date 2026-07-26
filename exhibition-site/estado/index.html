@@ -1,0 +1,480 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estado de Cotización - CronusFit</title>
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="icon" href="/favicon.ico">
+  <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+</head>
+<body class="bg-white text-brand-blue min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-brand-blue shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo + Brand -->
+        <a href="/" class="flex items-center gap-3" aria-label="CronusFit Home">
+          <img src="/assets/images/logo-cronusfit.png" alt="CronusFit" class="h-10 w-auto">
+          <span class="text-white font-bold text-xl hidden sm:inline">CronusFit</span>
+        </a>
+
+        <!-- Navigation -->
+        <nav class="flex items-center gap-4 sm:gap-6" aria-label="Main navigation">
+          <a href="/" class="text-white hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.home">Inicio</a>
+          <a href="/products/" class="text-white hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.products">Productos</a>
+          <a href="/cotizacion/" class="text-white hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.quote">Solicitar Cotización</a>
+          <a href="/estado/" class="text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.status">Estado de Cotización</a>
+          <button id="lang-switcher" class="text-brand-gold hover:text-brand-gold-light transition-colors text-sm font-medium border border-brand-gold rounded px-2 py-1" data-i18n="nav.language" aria-label="Switch language">English</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 py-12 sm:py-16">
+    <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Page Title -->
+      <h1 class="text-2xl sm:text-3xl font-bold text-brand-blue mb-8 text-center" data-i18n="status.title">Consultar Estado de Cotización</h1>
+
+      <!-- Status Query Form -->
+      <form id="status-form" class="bg-white rounded-lg shadow-md border border-gray-100 p-6 sm:p-8" novalidate>
+
+        <!-- Tracking Number Input -->
+        <div class="mb-6">
+          <label for="tracking-number" class="block text-sm font-medium text-gray-700 mb-2" data-i18n="status.tracking_input">Número de seguimiento</label>
+          <input
+            type="text"
+            id="tracking-number"
+            name="trackingNumber"
+            maxlength="36"
+            pattern="[A-Za-z0-9]+"
+            autocomplete="off"
+            required
+            class="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:ring-2 focus:ring-brand-gold focus:border-brand-gold outline-none transition-colors"
+            data-i18n-placeholder="status.tracking_input"
+            placeholder="Número de seguimiento"
+            aria-describedby="tracking-error"
+          >
+          <p id="tracking-error" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- hCaptcha Widget -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Verificación de seguridad</label>
+          <div class="rounded-lg overflow-visible border border-gray-200 bg-gray-50 p-4 min-h-[120px]">
+            <div id="hcaptcha-widget" class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001" data-callback="onCaptchaVerified" data-expired-callback="onCaptchaExpired"></div>
+          </div>
+          <p id="captcha-error" class="text-red-600 text-xs mt-2 hidden" role="alert" aria-live="polite"></p>
+          <p class="text-gray-400 text-xs mt-1">Protegido por hCaptcha</p>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          id="status-submit-btn"
+          class="w-full bg-brand-blue text-white font-medium py-3 px-6 rounded-md hover:bg-brand-blue-light transition-colors focus:ring-2 focus:ring-brand-gold focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          data-i18n="status.submit"
+        >
+          Consultar
+        </button>
+
+        <!-- Loading Indicator -->
+        <div id="status-loading" class="hidden flex items-center justify-center gap-2 mt-4">
+          <svg class="animate-spin h-5 w-5 text-brand-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span class="text-sm text-gray-600">...</span>
+        </div>
+      </form>
+
+      <!-- Status Result (hidden by default) -->
+      <div id="status-result" class="hidden mt-8 bg-white rounded-lg shadow-md border border-gray-100 p-6 sm:p-8">
+        <div class="space-y-4">
+          <!-- Quote Status -->
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-gray-500" data-i18n="status.tracking_input">Número de seguimiento</span>
+            <span id="result-tracking" class="text-sm font-semibold text-brand-blue"></span>
+          </div>
+          <hr class="border-gray-100">
+          <!-- Status Badge -->
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-gray-500" data-i18n="status.status_label">Estado</span>
+            <span id="result-status" class="inline-block px-3 py-1 text-xs font-semibold rounded-full"></span>
+          </div>
+          <hr class="border-gray-100">
+          <!-- Submission Date -->
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-gray-500" data-i18n="status.date_label">Fecha de envío</span>
+            <span id="result-date" class="text-sm text-gray-700"></span>
+          </div>
+          <hr class="border-gray-100">
+          <!-- Product Name -->
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-gray-500" data-i18n="status.product_label">Producto</span>
+            <span id="result-product" class="text-sm text-gray-700"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Not Found Message (hidden by default) -->
+      <div id="status-not-found" class="hidden mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+        <svg class="mx-auto h-10 w-10 text-yellow-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+        <p class="text-sm text-yellow-800" data-i18n="status.not_found">No se encontró una cotización con ese número de seguimiento.</p>
+      </div>
+
+      <!-- Error Message (hidden by default) -->
+      <div id="status-error" class="hidden mt-8 bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <svg class="mx-auto h-10 w-10 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p id="status-error-message" class="text-sm text-red-800" data-i18n="status.error">No se pudo consultar el estado. Intenta de nuevo.</p>
+      </div>
+
+      <!-- Rate Limit Message (hidden by default) -->
+      <div id="status-rate-limit" class="hidden mt-8 bg-orange-50 border border-orange-200 rounded-lg p-6 text-center">
+        <svg class="mx-auto h-10 w-10 text-orange-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p id="status-rate-limit-message" class="text-sm text-orange-800"></p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-brand-blue-dark text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <img src="/assets/images/logo-cronusfit.png" alt="CronusFit" class="h-8 w-auto">
+          <span class="font-bold">CronusFit</span>
+        </div>
+        <p class="text-sm text-gray-300">&copy; 2024 CronusFit. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- i18n Scripts -->
+  <script src="/assets/js/i18n.js"></script>
+  <script src="/assets/js/lang-switcher.js"></script>
+
+  <!-- Quote Status Script -->
+  <script>
+  (function () {
+    'use strict';
+
+    // --- Configuration ---
+    var API_BASE_URL = '/api'; // Will be replaced with actual API Gateway URL
+    var STATUS_ENDPOINT = API_BASE_URL + '/quotes/{trackingNumber}/status';
+    var REQUEST_TIMEOUT_MS = 30000;
+
+    // --- DOM References ---
+    var form = document.getElementById('status-form');
+    var trackingInput = document.getElementById('tracking-number');
+    var trackingError = document.getElementById('tracking-error');
+    var captchaError = document.getElementById('captcha-error');
+    var submitBtn = document.getElementById('status-submit-btn');
+    var loadingIndicator = document.getElementById('status-loading');
+    var resultSection = document.getElementById('status-result');
+    var notFoundSection = document.getElementById('status-not-found');
+    var errorSection = document.getElementById('status-error');
+    var errorMessage = document.getElementById('status-error-message');
+    var rateLimitSection = document.getElementById('status-rate-limit');
+    var rateLimitMessage = document.getElementById('status-rate-limit-message');
+
+    // Result fields
+    var resultTracking = document.getElementById('result-tracking');
+    var resultStatus = document.getElementById('result-status');
+    var resultDate = document.getElementById('result-date');
+    var resultProduct = document.getElementById('result-product');
+
+    // --- hCaptcha state ---
+    var captchaToken = null;
+
+    // Global callback for hCaptcha
+    window.onCaptchaVerified = function (token) {
+      captchaToken = token;
+      hideCaptchaError();
+    };
+
+    window.onCaptchaExpired = function () {
+      captchaToken = null;
+    };
+
+    // --- Validation ---
+
+    /**
+     * Validate tracking number: alphanumeric, 1-36 chars, not empty/whitespace-only.
+     * @param {string} value
+     * @returns {boolean}
+     */
+    function isValidTrackingNumber(value) {
+      if (!value || value.trim() === '') {
+        return false;
+      }
+      var trimmed = value.trim();
+      if (trimmed.length > 36) {
+        return false;
+      }
+      return /^[A-Za-z0-9]+$/.test(trimmed);
+    }
+
+    // --- UI Helpers ---
+
+    function showTrackingError(message) {
+      trackingError.textContent = message;
+      trackingError.classList.remove('hidden');
+      trackingInput.classList.add('border-red-500');
+      trackingInput.setAttribute('aria-invalid', 'true');
+    }
+
+    function hideTrackingError() {
+      trackingError.textContent = '';
+      trackingError.classList.add('hidden');
+      trackingInput.classList.remove('border-red-500');
+      trackingInput.removeAttribute('aria-invalid');
+    }
+
+    function showCaptchaError() {
+      captchaError.textContent = I18n.t('quote.error.captcha');
+      captchaError.classList.remove('hidden');
+    }
+
+    function hideCaptchaError() {
+      captchaError.textContent = '';
+      captchaError.classList.add('hidden');
+    }
+
+    function hideAllResults() {
+      resultSection.classList.add('hidden');
+      notFoundSection.classList.add('hidden');
+      errorSection.classList.add('hidden');
+      rateLimitSection.classList.add('hidden');
+    }
+
+    function setLoading(isLoading) {
+      if (isLoading) {
+        submitBtn.disabled = true;
+        loadingIndicator.classList.remove('hidden');
+      } else {
+        submitBtn.disabled = false;
+        loadingIndicator.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Get the CSS classes for a status badge based on the quote status.
+     * @param {string} status
+     * @returns {string}
+     */
+    function getStatusBadgeClasses(status) {
+      switch (status) {
+        case 'pending':
+          return 'bg-yellow-100 text-yellow-800';
+        case 'quoted':
+          return 'bg-blue-100 text-blue-800';
+        case 'accepted':
+          return 'bg-green-100 text-green-800';
+        case 'rejected':
+          return 'bg-red-100 text-red-800';
+        default:
+          return 'bg-gray-100 text-gray-800';
+      }
+    }
+
+    /**
+     * Get the localized status text.
+     * @param {string} status
+     * @returns {string}
+     */
+    function getStatusText(status) {
+      return I18n.t('status.' + status);
+    }
+
+    /**
+     * Display the status result in the UI.
+     * @param {object} data - { trackingNumber, status, submittedAt, productName }
+     */
+    function displayResult(data) {
+      hideAllResults();
+
+      resultTracking.textContent = data.trackingNumber;
+
+      // Status badge
+      resultStatus.textContent = getStatusText(data.status);
+      resultStatus.className = 'inline-block px-3 py-1 text-xs font-semibold rounded-full ' + getStatusBadgeClasses(data.status);
+
+      // Date formatted by locale
+      resultDate.textContent = I18n.formatDate(data.submittedAt);
+
+      // Product name
+      resultProduct.textContent = data.productName;
+
+      resultSection.classList.remove('hidden');
+    }
+
+    function displayNotFound() {
+      hideAllResults();
+      notFoundSection.classList.remove('hidden');
+    }
+
+    function displayError() {
+      hideAllResults();
+      errorMessage.textContent = I18n.t('status.error');
+      errorSection.classList.remove('hidden');
+    }
+
+    function displayRateLimit(seconds) {
+      hideAllResults();
+      var message = I18n.t('status.rate_limit', { seconds: String(seconds) });
+      rateLimitMessage.textContent = message;
+      rateLimitSection.classList.remove('hidden');
+    }
+
+    // --- API Call ---
+
+    /**
+     * Query the Quote Status API.
+     * @param {string} trackingNumber
+     * @param {string} token - hCaptcha token
+     */
+    function queryStatus(trackingNumber, token) {
+      var url = STATUS_ENDPOINT.replace('{trackingNumber}', encodeURIComponent(trackingNumber)) +
+        '?captchaToken=' + encodeURIComponent(token);
+
+      var controller = null;
+      var timeoutId = null;
+
+      // Use AbortController for timeout if available
+      if (typeof AbortController !== 'undefined') {
+        controller = new AbortController();
+        timeoutId = setTimeout(function () {
+          controller.abort();
+        }, REQUEST_TIMEOUT_MS);
+      }
+
+      var fetchOptions = {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      };
+
+      if (controller) {
+        fetchOptions.signal = controller.signal;
+      }
+
+      setLoading(true);
+
+      fetch(url, fetchOptions)
+        .then(function (response) {
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+
+          if (response.status === 200) {
+            return response.json().then(function (data) {
+              displayResult(data);
+            });
+          } else if (response.status === 404) {
+            displayNotFound();
+          } else if (response.status === 429) {
+            // Rate limited - extract Retry-After
+            var retryAfter = response.headers.get('Retry-After');
+            var seconds = retryAfter ? parseInt(retryAfter, 10) : 60;
+            if (isNaN(seconds) || seconds < 0) {
+              seconds = 60;
+            }
+            displayRateLimit(seconds);
+          } else {
+            displayError();
+          }
+        })
+        .catch(function () {
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+          displayError();
+        })
+        .finally(function () {
+          setLoading(false);
+          // Reset hCaptcha for next query
+          if (typeof hcaptcha !== 'undefined') {
+            hcaptcha.reset();
+          }
+          captchaToken = null;
+        });
+    }
+
+    // --- Form Submit Handler ---
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      hideAllResults();
+      hideTrackingError();
+      hideCaptchaError();
+
+      var trackingValue = trackingInput.value;
+
+      // Client-side validation: reject empty/whitespace-only
+      if (!trackingValue || trackingValue.trim() === '') {
+        showTrackingError(I18n.t('quote.error.required'));
+        trackingInput.focus();
+        return;
+      }
+
+      // Validate format (alphanumeric, max 36 chars)
+      if (!isValidTrackingNumber(trackingValue)) {
+        showTrackingError(I18n.t('quote.error.required'));
+        trackingInput.focus();
+        return;
+      }
+
+      // Validate hCaptcha
+      if (!captchaToken) {
+        showCaptchaError();
+        return;
+      }
+
+      // All good — query the API
+      queryStatus(trackingValue.trim(), captchaToken);
+    });
+
+    // --- hCaptcha Load Error Handling ---
+
+    /**
+     * Check if hCaptcha loaded successfully.
+     * If not, disable the submit button and show a message.
+     */
+    function checkCaptchaAvailability() {
+      // Wait a bit for the script to load
+      setTimeout(function () {
+        if (typeof hcaptcha === 'undefined') {
+          submitBtn.disabled = true;
+          captchaError.textContent = I18n.t('error.captcha_unavailable');
+          captchaError.classList.remove('hidden');
+        }
+      }, 5000);
+    }
+
+    checkCaptchaAvailability();
+
+    // --- Clear validation errors on input ---
+    trackingInput.addEventListener('input', function () {
+      hideTrackingError();
+    });
+
+  })();
+  </script>
+</body>
+</html>

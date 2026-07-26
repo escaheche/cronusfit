@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 160" fill="none">
+  <!-- CronusFit Hourglass Logo -->
+  <!-- Top cap -->
+  <rect x="20" y="10" width="80" height="8" rx="4" fill="#1e3a5f"/>
+  <!-- Bottom cap -->
+  <rect x="20" y="142" width="80" height="8" rx="4" fill="#1e3a5f"/>
+  <!-- Hourglass body -->
+  <path d="M30 18 L30 55 Q60 80 60 80 Q30 105 30 105 L30 142" stroke="#1e3a5f" stroke-width="4" fill="none"/>
+  <path d="M90 18 L90 55 Q60 80 60 80 Q90 105 90 105 L90 142" stroke="#1e3a5f" stroke-width="4" fill="none"/>
+  <!-- Top sand -->
+  <path d="M34 22 L86 22 L64 60 Q60 65 56 60 L34 22 Z" fill="#c9a84c" opacity="0.8"/>
+  <!-- Bottom sand -->
+  <path d="M34 138 L86 138 L64 100 Q60 95 56 100 L34 138 Z" fill="#c9a84c" opacity="0.6"/>
+  <!-- Center flow -->
+  <circle cx="60" cy="80" r="3" fill="#c9a84c"/>
+</svg>

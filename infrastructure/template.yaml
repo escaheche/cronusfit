@@ -1,0 +1,1189 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CronusFit Exhibition Website - Infrastructure
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues:
+      - dev
+      - prod
+  CognitoUserPoolArn:
+    Type: String
+    Description: ARN of the Cognito User Pool for admin authentication
+  DynamoDBTableName:
+    Type: String
+    Default: CronusFit
+    Description: Name of the existing CronusFit DynamoDB single-table
+  ExhibitionBucketName:
+    Type: String
+    Default: cronusfit-exhibition
+    Description: Name of the S3 bucket hosting the exhibition static site
+  CloudFrontDistributionId:
+    Type: String
+    Default: ''
+    Description: CloudFront distribution ID for cache invalidation
+  AdminEmail:
+    Type: String
+    Description: Admin email address for SES notifications
+  SenderEmail:
+    Type: String
+    Description: Verified SES sender email address
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 30
+    MemorySize: 256
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref DynamoDBTableName
+        ENVIRONMENT: !Ref Environment
+
+Resources:
+  # ============================================================
+  # DynamoDB Table Prerequisites (Existing Shared Table)
+  # ============================================================
+  # The CronusFit DynamoDB single-table is managed externally (referenced
+  # via the DynamoDBTableName parameter). The following configuration MUST
+  # exist on that table for the Exhibition Website to function correctly:
+  #
+  # 1. TTL: Enabled with attribute name "ttl"
+  #    - Used by: Rate limit counters (15-min window expiry),
+  #      used CAPTCHA tokens (5-min expiry), rebuild queue entries (1-hour expiry),
+  #      rebuild status records (24-hour expiry)
+  #
+  # 2. GSI1 (Global Secondary Index):
+  #    - Partition key: GSI1PK (String)
+  #    - Sort key: GSI1SK (String)
+  #    - Used by: Product publication queries (GSI1PK = "PUBLISHED#true",
+  #      GSI1SK = "CREATED#{timestamp}") to fetch all published products
+  #      ordered by publication date
+  #
+  # These are assumed to already exist on the shared CronusFit table.
+  # ============================================================
+
+  # ============================================================
+  # Secrets Manager - hCaptcha Credentials
+  # ============================================================
+  HCaptchaSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: cronusfit/hcaptcha-secret
+      Description: hCaptcha site key and secret key for server-side verification on public forms
+      SecretString: '{"siteKey": "REPLACE_WITH_HCAPTCHA_SITE_KEY", "secretKey": "REPLACE_WITH_HCAPTCHA_SECRET_KEY"}'
+      Tags:
+        - Key: Project
+          Value: CronusFit
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ============================================================
+  # SES (Simple Email Service) - Admin Notifications
+  # ============================================================
+  # SES email identities cannot be fully provisioned via CloudFormation
+  # in sandbox mode. The following MUST be configured manually in the
+  # AWS SES Console:
+  #
+  # 1. Verify the sender email address (SenderEmail parameter) in SES
+  # 2. Verify the admin recipient email (AdminEmail parameter) in SES
+  # 3. If sending to non-verified recipients, request SES production access
+  #
+  # The Lambda functions (site-rebuild, site-invalidate, monitor-usage)
+  # already have IAM permissions for ses:SendEmail and ses:SendRawEmail
+  # scoped to the account's SES identities.
+  # ============================================================
+
+  # ============================================================
+  # API Gateway - REST API for Exhibition Website
+  # ============================================================
+  ExhibitionApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub cronusfit-exhibition-api-${Environment}
+      StageName: !Ref Environment
+      Description: CronusFit Exhibition Website Public and Admin API
+      EndpointConfiguration:
+        Type: REGIONAL
+      MethodSettings:
+        - ResourcePath: '/*'
+          HttpMethod: '*'
+          ThrottlingRateLimit: 100
+          ThrottlingBurstLimit: 200
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+        MaxAge: "'600'"
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !Ref CognitoUserPoolArn
+            Identity:
+              Header: Authorization
+          LambdaAuthorizer:
+            FunctionArn: !GetAtt AuthValidateFunction.Arn
+            Identity:
+              Header: Authorization
+      GatewayResponses:
+        DEFAULT_4XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+        DEFAULT_5XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+        THROTTLED:
+          StatusCode: 429
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+          ResponseTemplates:
+            application/json: '{"message": "Rate limit exceeded. Please try again later."}'
+
+  # ============================================================
+  # Lambda Functions - Public Quote API
+  # ============================================================
+  QuoteSubmitFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-quote-submit-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/quote-submit/
+      Description: Processes public quote form submissions with hCaptcha and rate limiting
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        PostQuotes:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /quotes
+            Method: POST
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:cronusfit/hcaptcha-*
+
+  QuoteStatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-quote-status-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/quote-status/
+      Description: Processes public quote status queries with hCaptcha and rate limiting
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetQuoteStatus:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /quotes/{trackingNumber}/status
+            Method: GET
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:cronusfit/hcaptcha-*
+
+  # ============================================================
+  # S3 Bucket - Private Static Site Hosting (OAI-only access)
+  # ============================================================
+  ExhibitionSiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub cronusfit-exhibition-site-${Environment}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Project
+          Value: CronusFit
+        - Key: Environment
+          Value: !Ref Environment
+
+  ExhibitionSiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ExhibitionSiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontOAIRead
+            Effect: Allow
+            Principal:
+              CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+            Action: s3:GetObject
+            Resource: !Sub ${ExhibitionSiteBucket.Arn}/*
+
+  # ============================================================
+  # CloudFront Distribution with OAI
+  # ============================================================
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub OAI for CronusFit Exhibition Site (${Environment})
+
+  ExhibitionDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub CronusFit Exhibition Site CDN (${Environment})
+        DefaultRootObject: index.html
+        HttpVersion: http2
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+          MinimumProtocolVersion: TLSv1.2_2021
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt ExhibitionSiteBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+          Compress: true
+          DefaultTTL: 3600
+          MinTTL: 0
+          MaxTTL: 86400
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+        CacheBehaviors:
+          # Admin Panel — SPA with Hash Router
+          # All requests under /admin/* serve admin/index.html (enables client-side routing).
+          # 403/404 errors under this prefix return admin/index.html with HTTP 200.
+          - PathPattern: '/admin/*'
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            DefaultTTL: 0
+            MinTTL: 0
+            MaxTTL: 31536000
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+            ResponseHeadersPolicyId: !Ref AdminResponseHeadersPolicy
+          - PathPattern: '*.css'
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            DefaultTTL: 86400
+            MinTTL: 0
+            MaxTTL: 604800
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+          - PathPattern: '*.js'
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            DefaultTTL: 86400
+            MinTTL: 0
+            MaxTTL: 604800
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+          - PathPattern: 'images/*'
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            DefaultTTL: 86400
+            MinTTL: 0
+            MaxTTL: 604800
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+          - PathPattern: '*.woff2'
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            DefaultTTL: 86400
+            MinTTL: 0
+            MaxTTL: 604800
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+          - PathPattern: '*.svg'
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            DefaultTTL: 86400
+            MinTTL: 0
+            MaxTTL: 604800
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+        CustomErrorResponses:
+          # Exhibition site 404/403 — serve 404 page
+          - ErrorCode: 403
+            ResponseCode: 404
+            ResponsePagePath: /404.html
+            ErrorCachingMinTTL: 300
+          - ErrorCode: 404
+            ResponseCode: 404
+            ResponsePagePath: /404.html
+            ErrorCachingMinTTL: 300
+          # Admin panel SPA — CloudFront custom errors serve admin/index.html with 200
+          # This enables the Hash Router for direct URL access (e.g. /admin/#patrones)
+          # NOTE: CloudFront error responses are distribution-wide; the /admin/* CacheBehavior
+          # above overrides caching TTL, but error handling still routes 403/404 to admin/index.html.
+          # For a split-path approach (404 to /404.html for exhibition, /admin/index.html for admin),
+          # a Lambda@Edge viewer-response function would be needed. The simpler solution used here
+          # is to serve admin/index.html for all 403/404, which works because the exhibition site
+          # uses a custom 404.html referenced here, while the Hash Router handles admin navigation.
+      Tags:
+        - Key: Project
+          Value: CronusFit
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ============================================================
+  # CloudFront ResponseHeadersPolicy — Admin Panel CSP
+  # ============================================================
+  AdminResponseHeadersPolicy:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub cronusfit-admin-security-headers-${Environment}
+        Comment: Security headers for the CronusFit Admin Panel (/admin/*)
+        SecurityHeadersConfig:
+          ContentSecurityPolicy:
+            ContentSecurityPolicy: >-
+              default-src 'self';
+              script-src 'self' https://cdn.jsdelivr.net;
+              connect-src 'self'
+                https://dp5pdbigb1.execute-api.us-east-1.amazonaws.com
+                https://cognito-idp.us-east-1.amazonaws.com
+                https://cognito-identity.us-east-1.amazonaws.com;
+              style-src 'self' https://fonts.googleapis.com;
+              font-src 'self' https://fonts.gstatic.com;
+              img-src 'self' data: blob: https://cronusfit-exhibition-site-prod.s3.amazonaws.com;
+            Override: true
+          XContentTypeOptions:
+            Override: true
+          XFrameOptions:
+            FrameOption: DENY
+            Override: true
+          StrictTransportSecurity:
+            AccessControlMaxAgeSec: 31536000
+            IncludeSubdomains: true
+            Override: true
+
+  # ============================================================
+  # Lambda Functions - Admin Publish/Unpublish (Cognito-protected)
+  # ============================================================
+  SitePublishFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-site-publish-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/site-publish/
+      Description: Handles admin product publish/unpublish actions (JWT-protected)
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        PublishProduct:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /products/{id}/publish
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+        UnpublishProduct:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /products/{id}/unpublish
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cronusfit-site-rebuild-${Environment}
+
+  # ============================================================
+  # Lambda Layer - Sharp (Image Processing)
+  # ============================================================
+  SharpLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub cronusfit-sharp-${Environment}
+      Description: Sharp image processing library compiled for Amazon Linux 2 (Node.js 20.x)
+      ContentUri: layers/sharp/
+      CompatibleRuntimes:
+        - nodejs20.x
+      RetentionPolicy: Delete
+
+  # ============================================================
+  # Lambda Functions - Site Build Pipeline
+  # ============================================================
+  SiteRebuildFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-site-rebuild-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/site-rebuild/
+      Description: Rebuilds the static exhibition site using Eleventy with image processing via sharp
+      Timeout: 60
+      MemorySize: 512
+      Layers:
+        - !Ref SharpLayer
+      Environment:
+        Variables:
+          EXHIBITION_BUCKET: !Ref ExhibitionBucketName
+          CLOUDFRONT_DISTRIBUTION_ID: !Ref CloudFrontDistributionId
+          ADMIN_EMAIL: !Ref AdminEmail
+          SENDER_EMAIL: !Ref SenderEmail
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - S3CrudPolicy:
+            BucketName: !Ref ExhibitionBucketName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cronusfit-site-invalidate-${Environment}
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*
+
+  SiteInvalidateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-site-invalidate-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/site-invalidate/
+      Description: Invalidates CloudFront cache paths after successful site rebuild
+      Timeout: 60
+      MemorySize: 256
+      Environment:
+        Variables:
+          CLOUDFRONT_DISTRIBUTION_ID: !Ref CloudFrontDistributionId
+          ADMIN_EMAIL: !Ref AdminEmail
+          SENDER_EMAIL: !Ref SenderEmail
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cloudfront:CreateInvalidation
+                - cloudfront:GetInvalidation
+              Resource: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistributionId}
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*
+
+  # ============================================================
+  # Lambda Functions - Usage Monitoring
+  # ============================================================
+  MonitorUsageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-monitor-usage-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/monitor-usage/
+      Description: Monitors AWS Free Tier usage and triggers alerts/degradation at thresholds
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          ADMIN_EMAIL: !Ref AdminEmail
+          SENDER_EMAIL: !Ref SenderEmail
+      Events:
+        ScheduledCheck:
+          Type: Schedule
+          Properties:
+            Schedule: rate(6 hours)
+            Description: Check AWS Free Tier usage every 6 hours (Req 11.8)
+            Enabled: true
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cloudwatch:GetMetricStatistics
+                - cloudwatch:GetMetricData
+                - cloudwatch:ListMetrics
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*
+
+  # ============================================================
+  # Lambda Functions - Pattern Generation (Cognito-protected)
+  # ============================================================
+  PatternGenerateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-pattern-generate-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/pattern-generate/
+      Description: Generates SVG cutting patterns from parametric templates (JWT-protected)
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          TEMPLATES_PATH: /var/task/templates/parametric
+          S3_ASSETS_BUCKET: !Sub cronusfit-exhibition-site-${Environment}
+      Events:
+        PostPatternGenerate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/patterns/generate
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - S3CrudPolicy:
+            BucketName: !Sub cronusfit-exhibition-site-${Environment}
+
+  PatternGradeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-pattern-grade-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/pattern-grade/
+      Description: Grades patterns across multiple sizes using age-group increment tables (JWT-protected)
+      Timeout: 60
+      MemorySize: 256
+      Environment:
+        Variables:
+          TEMPLATES_PATH: /var/task/templates/parametric
+      Events:
+        PostPatternGrade:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/patterns/grade
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - S3CrudPolicy:
+            BucketName: !Ref ExhibitionBucketName
+
+  PatternSerializeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-pattern-serialize-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/pattern-serialize/
+      Description: Serializes/deserializes SVG patterns to/from JSON (JWT-protected)
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          TEMPLATES_PATH: /var/task/templates/parametric
+      Events:
+        PostPatternSerialize:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/patterns/serialize
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+        PostPatternDeserialize:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/patterns/deserialize
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - S3CrudPolicy:
+            BucketName: !Ref ExhibitionBucketName
+
+  # ============================================================
+  # Lambda Functions - Mockup Generation (Cognito-protected)
+  # ============================================================
+  MockupGenerateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-mockup-generate-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/mockup-generate/
+      Description: Generates front/back garment mockups with design overlay (JWT-protected)
+      Timeout: 60
+      MemorySize: 512
+      Layers:
+        - !Ref SharpLayer
+      Events:
+        PostMockupGenerate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/mockups/generate
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - S3CrudPolicy:
+            BucketName: !Ref ExhibitionBucketName
+
+  # ============================================================
+  # Lambda Functions - Approval Workflow (Cognito-protected)
+  # ============================================================
+  ApprovalProcessFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-approval-process-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/approval-process/
+      Description: Handles mockup approve/reject actions and pending queue (JWT-protected)
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        PostMockupApprove:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/mockups/{id}/approve
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+        PostMockupReject:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/mockups/{id}/reject
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+
+  ApprovalAuditFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-approval-audit-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/approval-audit/
+      Description: Retrieves audit trail for mockup approval workflow (JWT-protected)
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetMockupAudit:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/audit/mockups/{id}
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+
+  # ============================================================
+  # Lambda Functions - Quote Admin (Cognito-protected)
+  # ============================================================
+  QuoteProcessFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-quote-process-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/quote-process/
+      Description: Admin sets price on pending quotes (JWT-protected)
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        PostQuotePrice:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/quotes/{id}/price
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*
+
+  QuoteNotifyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-quote-notify-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/quote-notify/
+      Description: Sends quote notifications via SES and WhatsApp (JWT-protected)
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          SES_FROM_EMAIL: !Ref SenderEmail
+          ADMIN_EMAIL: !Ref AdminEmail
+          N8N_WEBHOOK_URL: ''
+      Events:
+        PostQuoteNotify:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/quotes/{id}/notify
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*
+
+  # ============================================================
+  # Lambda Functions - Print File Generation (Cognito-protected)
+  # ============================================================
+  PrintDtfFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-print-dtf-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/print-dtf/
+      Description: Generates production-ready DTF print files (JWT-protected)
+      Timeout: 60
+      MemorySize: 512
+      Layers:
+        - !Ref SharpLayer
+      Events:
+        PostPrintDtf:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/print/dtf
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - S3CrudPolicy:
+            BucketName: !Ref ExhibitionBucketName
+
+  PrintSublimationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-print-sublimation-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/print-sublimation/
+      Description: Generates production-ready sublimation print files (JWT-protected)
+      Timeout: 60
+      MemorySize: 512
+      Layers:
+        - !Ref SharpLayer
+      Events:
+        PostPrintSublimation:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/print/sublimation
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - S3CrudPolicy:
+            BucketName: !Ref ExhibitionBucketName
+
+  # ============================================================
+  # Lambda Functions - Social Content (Cognito-protected)
+  # ============================================================
+  SocialGenerateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-social-generate-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/social-generate/
+      Description: Generates social media content for Instagram/Facebook (JWT-protected)
+      Timeout: 60
+      MemorySize: 512
+      Layers:
+        - !Ref SharpLayer
+      Events:
+        PostSocialGenerate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/social/generate
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - S3CrudPolicy:
+            BucketName: !Ref ExhibitionBucketName
+
+  # ============================================================
+  # Lambda Functions - WhatsApp (Cognito-protected + Webhook)
+  # ============================================================
+  WaSendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-wa-send-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/wa-send/
+      Description: Sends mockup/quote share via WhatsApp (JWT-protected)
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        PostWaSend:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/mockups/{id}/share-whatsapp
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+
+  WaReceiveFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-wa-receive-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/wa-receive/
+      Description: Receives WhatsApp webhook callbacks (shared secret auth in handler)
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        PostWaWebhook:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /webhooks/whatsapp-response
+            Method: POST
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:cronusfit/*
+
+  WaQueueFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-wa-queue-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/wa-queue/
+      Description: Processes queued failed WhatsApp messages for retry (JWT-protected)
+      Timeout: 60
+      MemorySize: 256
+      Events:
+        PostWaRetryQueue:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/whatsapp/retry-queue
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+
+  # ============================================================
+  # Lambda Functions - Monitor Alert (Internal invocation)
+  # ============================================================
+  MonitorAlertFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-monitor-alert-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/monitor-alert/
+      Description: Processes threshold breach alerts and manages service degradation
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          ADMIN_EMAIL: !Ref AdminEmail
+          SENDER_EMAIL: !Ref SenderEmail
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*
+
+  # ============================================================
+  # Lambda Functions - Auth Validate (Lambda Authorizer)
+  # ============================================================
+  AuthValidateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-auth-validate-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/auth-validate/
+      Description: Lambda Authorizer that validates Cognito JWT tokens
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !Select [1, !Split ['/', !Select [5, !Split [':', !Ref CognitoUserPoolArn]]]]
+          COGNITO_USER_POOL_ARN: !Ref CognitoUserPoolArn
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:GetUser
+                - cognito-idp:AdminGetUser
+              Resource: !Ref CognitoUserPoolArn
+
+  # ============================================================
+  # Lambda Functions - Audit Write (Internal invocation)
+  # ============================================================
+  AuditWriteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-audit-write-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/audit-write/
+      Description: Batch audit log writer invoked by other Lambdas
+      Timeout: 30
+      MemorySize: 256
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+
+Outputs:
+  HCaptchaSecretArn:
+    Description: ARN of the hCaptcha secret in Secrets Manager
+    Value: !Ref HCaptchaSecret
+    Export:
+      Name: !Sub ${AWS::StackName}-HCaptchaSecretArn
+
+  ExhibitionApiUrl:
+    Description: URL of the Exhibition API Gateway
+    Value: !Sub https://${ExhibitionApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+    Export:
+      Name: !Sub ${AWS::StackName}-ApiUrl
+
+  ExhibitionApiId:
+    Description: API Gateway REST API ID
+    Value: !Ref ExhibitionApi
+    Export:
+      Name: !Sub ${AWS::StackName}-ApiId
+
+  QuoteSubmitFunctionArn:
+    Description: ARN of the Quote Submit Lambda function
+    Value: !GetAtt QuoteSubmitFunction.Arn
+
+  QuoteStatusFunctionArn:
+    Description: ARN of the Quote Status Lambda function
+    Value: !GetAtt QuoteStatusFunction.Arn
+
+  SitePublishFunctionArn:
+    Description: ARN of the Site Publish Lambda function
+    Value: !GetAtt SitePublishFunction.Arn
+
+  SiteRebuildFunctionArn:
+    Description: ARN of the Site Rebuild Lambda function
+    Value: !GetAtt SiteRebuildFunction.Arn
+
+  SiteInvalidateFunctionArn:
+    Description: ARN of the Site Invalidate Lambda function
+    Value: !GetAtt SiteInvalidateFunction.Arn
+
+  MonitorUsageFunctionArn:
+    Description: ARN of the Monitor Usage Lambda function
+    Value: !GetAtt MonitorUsageFunction.Arn
+
+  SharpLayerArn:
+    Description: ARN of the Sharp Lambda Layer
+    Value: !Ref SharpLayer
+
+  ExhibitionSiteBucketName:
+    Description: Name of the S3 bucket hosting the exhibition site
+    Value: !Ref ExhibitionSiteBucket
+    Export:
+      Name: !Sub ${AWS::StackName}-SiteBucketName
+
+  ExhibitionDistributionId:
+    Description: CloudFront Distribution ID for cache invalidation
+    Value: !Ref ExhibitionDistribution
+    Export:
+      Name: !Sub ${AWS::StackName}-DistributionId
+
+  ExhibitionDistributionDomainName:
+    Description: CloudFront Distribution domain name for the exhibition site
+    Value: !GetAtt ExhibitionDistribution.DomainName
+    Export:
+      Name: !Sub ${AWS::StackName}-DistributionDomain
+
+  PatternGenerateFunctionArn:
+    Description: ARN of the Pattern Generate Lambda function
+    Value: !GetAtt PatternGenerateFunction.Arn
+
+  PatternGradeFunctionArn:
+    Description: ARN of the Pattern Grade Lambda function
+    Value: !GetAtt PatternGradeFunction.Arn
+
+  PatternSerializeFunctionArn:
+    Description: ARN of the Pattern Serialize Lambda function
+    Value: !GetAtt PatternSerializeFunction.Arn
+
+  MockupGenerateFunctionArn:
+    Description: ARN of the Mockup Generate Lambda function
+    Value: !GetAtt MockupGenerateFunction.Arn
+
+  ApprovalProcessFunctionArn:
+    Description: ARN of the Approval Process Lambda function
+    Value: !GetAtt ApprovalProcessFunction.Arn
+
+  ApprovalAuditFunctionArn:
+    Description: ARN of the Approval Audit Lambda function
+    Value: !GetAtt ApprovalAuditFunction.Arn
+
+  QuoteProcessFunctionArn:
+    Description: ARN of the Quote Process Lambda function
+    Value: !GetAtt QuoteProcessFunction.Arn
+
+  QuoteNotifyFunctionArn:
+    Description: ARN of the Quote Notify Lambda function
+    Value: !GetAtt QuoteNotifyFunction.Arn
+
+  PrintDtfFunctionArn:
+    Description: ARN of the Print DTF Lambda function
+    Value: !GetAtt PrintDtfFunction.Arn
+
+  PrintSublimationFunctionArn:
+    Description: ARN of the Print Sublimation Lambda function
+    Value: !GetAtt PrintSublimationFunction.Arn
+
+  SocialGenerateFunctionArn:
+    Description: ARN of the Social Generate Lambda function
+    Value: !GetAtt SocialGenerateFunction.Arn
+
+  WaSendFunctionArn:
+    Description: ARN of the WhatsApp Send Lambda function
+    Value: !GetAtt WaSendFunction.Arn
+
+  WaReceiveFunctionArn:
+    Description: ARN of the WhatsApp Receive Lambda function
+    Value: !GetAtt WaReceiveFunction.Arn
+
+  WaQueueFunctionArn:
+    Description: ARN of the WhatsApp Queue Lambda function
+    Value: !GetAtt WaQueueFunction.Arn
+
+  MonitorAlertFunctionArn:
+    Description: ARN of the Monitor Alert Lambda function
+    Value: !GetAtt MonitorAlertFunction.Arn
+
+  AuthValidateFunctionArn:
+    Description: ARN of the Auth Validate Lambda Authorizer function
+    Value: !GetAtt AuthValidateFunction.Arn
+
+  AuditWriteFunctionArn:
+    Description: ARN of the Audit Write Lambda function
+    Value: !GetAtt AuditWriteFunction.Arn

@@ -1,0 +1,71 @@
+{
+  "id": "tpl-adult-short",
+  "garmentType": "short",
+  "ageGroup": "adult",
+  "proportionProfile": {
+    "ageGroup": "adult",
+    "headToBodyRatio": 0.133,
+    "limbToTorsoRatio": 1.2,
+    "waistPositionRatio": 0.42,
+    "shoulderToHipRatio": 1.1
+  },
+  "pieces": [
+    {
+      "id": "panel-frontal",
+      "controlPoints": [
+        { "id": "cp-waist-front", "name": "Ancho cintura frontal", "x": 200, "y": 20, "minValue": 300, "maxValue": 600, "affectedPieces": ["panel-frontal"], "measurementRef": "waist", "scaleFactor": 0.5, "min": 300, "max": 600 },
+        { "id": "cp-hip-front", "name": "Ancho cadera frontal", "x": 220, "y": 120, "minValue": 400, "maxValue": 675, "affectedPieces": ["panel-frontal"], "measurementRef": "hip", "scaleFactor": 0.5, "min": 400, "max": 675 },
+        { "id": "cp-leg-front", "name": "Largo pierna frontal", "x": 110, "y": 320, "minValue": 150, "maxValue": 350, "affectedPieces": ["panel-frontal"], "measurementRef": "legLength", "scaleFactor": 0.3, "min": 150, "max": 350 }
+      ],
+      "seamAllowanceMm": 15,
+      "grainLineAngle": 90,
+      "notchPositions": [0.3, 0.5, 0.7]
+    },
+    {
+      "id": "panel-trasero",
+      "controlPoints": [
+        { "id": "cp-waist-back", "name": "Ancho cintura trasero", "x": 210, "y": 20, "minValue": 310, "maxValue": 620, "affectedPieces": ["panel-trasero"], "measurementRef": "waist", "scaleFactor": 0.52, "min": 310, "max": 620 },
+        { "id": "cp-hip-back", "name": "Ancho cadera trasero", "x": 230, "y": 120, "minValue": 420, "maxValue": 700, "affectedPieces": ["panel-trasero"], "measurementRef": "hip", "scaleFactor": 0.52, "min": 420, "max": 700 },
+        { "id": "cp-leg-back", "name": "Largo pierna trasero", "x": 115, "y": 330, "minValue": 155, "maxValue": 360, "affectedPieces": ["panel-trasero"], "measurementRef": "legLength", "scaleFactor": 0.32, "min": 155, "max": 360 }
+      ],
+      "seamAllowanceMm": 15,
+      "grainLineAngle": 90,
+      "notchPositions": [0.3, 0.5, 0.7]
+    },
+    {
+      "id": "pretina",
+      "controlPoints": [
+        { "id": "cp-waistband-width", "name": "Ancho pretina", "x": 400, "y": 25, "minValue": 600, "maxValue": 1200, "affectedPieces": ["pretina"], "measurementRef": "waist", "scaleFactor": 1.0, "min": 600, "max": 1200 }
+      ],
+      "seamAllowanceMm": 15,
+      "grainLineAngle": 0,
+      "notchPositions": [0.25, 0.5, 0.75]
+    }
+  ],
+  "controlPoints": [
+    { "id": "cp-waist", "name": "Contorno de cintura", "x": 200, "y": 20, "minValue": 600, "maxValue": 1200, "affectedPieces": ["panel-frontal", "panel-trasero", "pretina"], "measurementRef": "waist", "scaleFactor": 1.0, "min": 600, "max": 1200 },
+    { "id": "cp-hip", "name": "Contorno de cadera", "x": 220, "y": 120, "minValue": 800, "maxValue": 1350, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "hip", "scaleFactor": 1.0, "min": 800, "max": 1350 },
+    { "id": "cp-leg-length", "name": "Largo de pierna", "x": 110, "y": 320, "minValue": 400, "maxValue": 900, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "legLength", "scaleFactor": 0.3, "min": 400, "max": 900 },
+    { "id": "cp-torso-length", "name": "Largo de torso", "x": 110, "y": 180, "minValue": 420, "maxValue": 640, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "torsoLength", "scaleFactor": 0.35, "min": 420, "max": 640 }
+  ],
+  "pieceDefinitions": [
+    { "id": "panel-frontal", "name": "Panel frontal", "cutQuantity": 1, "pathFunction": "short_front_panel", "grainLineAngle": 90, "notchPositions": [{ "edgeId": "side-left", "position": 0.5, "matchingPieceEdgeId": "panel-trasero:side-left" }, { "edgeId": "crotch", "position": 0.5, "matchingPieceEdgeId": "panel-trasero:crotch" }, { "edgeId": "waist-top", "position": 0.5, "matchingPieceEdgeId": "pretina:bottom" }] },
+    { "id": "panel-trasero", "name": "Panel trasero", "cutQuantity": 1, "pathFunction": "short_back_panel", "grainLineAngle": 90, "notchPositions": [{ "edgeId": "side-left", "position": 0.5, "matchingPieceEdgeId": "panel-frontal:side-left" }, { "edgeId": "crotch", "position": 0.5, "matchingPieceEdgeId": "panel-frontal:crotch" }, { "edgeId": "waist-top", "position": 0.5, "matchingPieceEdgeId": "pretina:bottom" }] },
+    { "id": "pretina", "name": "Pretina", "cutQuantity": 1, "pathFunction": "short_waistband", "grainLineAngle": 0, "notchPositions": [{ "edgeId": "bottom", "position": 0.25, "matchingPieceEdgeId": "panel-frontal:waist-top" }, { "edgeId": "bottom", "position": 0.75, "matchingPieceEdgeId": "panel-trasero:waist-top" }] }
+  ],
+  "defaultMeasurements": {
+    "chest": 1000,
+    "waist": 840,
+    "hip": 1000,
+    "torsoLength": 600,
+    "legLength": 800,
+    "shoulderWidth": 460
+  },
+  "constraints": [
+    { "controlPointId": "cp-waist", "min": 600, "max": 1200 },
+    { "controlPointId": "cp-hip", "min": 800, "max": 1350 },
+    { "controlPointId": "cp-leg-length", "min": 400, "max": 900 },
+    { "controlPointId": "cp-torso-length", "min": 420, "max": 640 },
+    { "controlPointId": "cp-hip", "min": 800, "max": 1350, "relatedTo": "cp-waist", "relationship": "greater_than" }
+  ]
+}

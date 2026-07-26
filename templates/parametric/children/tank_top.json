@@ -1,0 +1,65 @@
+{
+  "id": "tpl-children-tank-top",
+  "garmentType": "tank-top",
+  "ageGroup": "children",
+  "proportionProfile": {
+    "ageGroup": "children",
+    "headToBodyRatio": 0.2,
+    "limbToTorsoRatio": 0.9,
+    "waistPositionRatio": 0.47,
+    "shoulderToHipRatio": 0.95
+  },
+  "pieces": [
+    {
+      "id": "panel-frontal",
+      "controlPoints": [
+        { "id": "cp-chest-front", "name": "Ancho pecho frontal", "x": 240, "y": 160, "minValue": 250, "maxValue": 400, "affectedPieces": ["panel-frontal"], "measurementRef": "chest", "scaleFactor": 0.5, "min": 250, "max": 400 },
+        { "id": "cp-waist-front", "name": "Ancho cintura frontal", "x": 220, "y": 260, "minValue": 200, "maxValue": 350, "affectedPieces": ["panel-frontal"], "measurementRef": "waist", "scaleFactor": 0.5, "min": 200, "max": 350 },
+        { "id": "cp-torso-front", "name": "Largo torso frontal", "x": 170, "y": 330, "minValue": 240, "maxValue": 430, "affectedPieces": ["panel-frontal"], "measurementRef": "torsoLength", "scaleFactor": 0.68, "min": 240, "max": 430 },
+        { "id": "cp-shoulder-front", "name": "Ancho hombro frontal", "x": 260, "y": 40, "minValue": 125, "maxValue": 200, "affectedPieces": ["panel-frontal"], "measurementRef": "shoulderWidth", "scaleFactor": 0.5, "min": 125, "max": 200 }
+      ],
+      "seamAllowanceMm": 15,
+      "grainLineAngle": 90,
+      "notchPositions": [0.25, 0.5, 0.75]
+    },
+    {
+      "id": "panel-trasero",
+      "controlPoints": [
+        { "id": "cp-chest-back", "name": "Ancho pecho trasero", "x": 240, "y": 160, "minValue": 250, "maxValue": 400, "affectedPieces": ["panel-trasero"], "measurementRef": "chest", "scaleFactor": 0.5, "min": 250, "max": 400 },
+        { "id": "cp-waist-back", "name": "Ancho cintura trasero", "x": 220, "y": 260, "minValue": 200, "maxValue": 350, "affectedPieces": ["panel-trasero"], "measurementRef": "waist", "scaleFactor": 0.5, "min": 200, "max": 350 },
+        { "id": "cp-torso-back", "name": "Largo torso trasero", "x": 170, "y": 340, "minValue": 245, "maxValue": 440, "affectedPieces": ["panel-trasero"], "measurementRef": "torsoLength", "scaleFactor": 0.7, "min": 245, "max": 440 },
+        { "id": "cp-shoulder-back", "name": "Ancho hombro trasero", "x": 260, "y": 40, "minValue": 125, "maxValue": 200, "affectedPieces": ["panel-trasero"], "measurementRef": "shoulderWidth", "scaleFactor": 0.5, "min": 125, "max": 200 }
+      ],
+      "seamAllowanceMm": 15,
+      "grainLineAngle": 90,
+      "notchPositions": [0.25, 0.5, 0.75]
+    }
+  ],
+  "controlPoints": [
+    { "id": "cp-chest", "name": "Contorno de pecho", "x": 240, "y": 160, "minValue": 500, "maxValue": 800, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "chest", "scaleFactor": 1.0, "min": 500, "max": 800 },
+    { "id": "cp-waist", "name": "Contorno de cintura", "x": 220, "y": 260, "minValue": 400, "maxValue": 700, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "waist", "scaleFactor": 1.0, "min": 400, "max": 700 },
+    { "id": "cp-hip", "name": "Contorno de cadera", "x": 230, "y": 320, "minValue": 450, "maxValue": 750, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "hip", "scaleFactor": 1.0, "min": 450, "max": 750 },
+    { "id": "cp-torso-length", "name": "Largo de torso", "x": 170, "y": 330, "minValue": 240, "maxValue": 430, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "torsoLength", "scaleFactor": 0.68, "min": 240, "max": 430 },
+    { "id": "cp-shoulder-width", "name": "Ancho de hombros", "x": 260, "y": 40, "minValue": 250, "maxValue": 400, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "shoulderWidth", "scaleFactor": 1.0, "min": 250, "max": 400 }
+  ],
+  "pieceDefinitions": [
+    { "id": "panel-frontal", "name": "Panel frontal", "cutQuantity": 1, "pathFunction": "tank_top_front_panel", "grainLineAngle": 90, "notchPositions": [{ "edgeId": "shoulder-left", "position": 0.5, "matchingPieceEdgeId": "panel-trasero:shoulder-left" }, { "edgeId": "shoulder-right", "position": 0.5, "matchingPieceEdgeId": "panel-trasero:shoulder-right" }, { "edgeId": "side-left", "position": 0.5, "matchingPieceEdgeId": "panel-trasero:side-left" }, { "edgeId": "side-right", "position": 0.5, "matchingPieceEdgeId": "panel-trasero:side-right" }] },
+    { "id": "panel-trasero", "name": "Panel trasero", "cutQuantity": 1, "pathFunction": "tank_top_back_panel", "grainLineAngle": 90, "notchPositions": [{ "edgeId": "shoulder-left", "position": 0.5, "matchingPieceEdgeId": "panel-frontal:shoulder-left" }, { "edgeId": "shoulder-right", "position": 0.5, "matchingPieceEdgeId": "panel-frontal:shoulder-right" }, { "edgeId": "side-left", "position": 0.5, "matchingPieceEdgeId": "panel-frontal:side-left" }, { "edgeId": "side-right", "position": 0.5, "matchingPieceEdgeId": "panel-frontal:side-right" }] }
+  ],
+  "defaultMeasurements": {
+    "chest": 620,
+    "waist": 560,
+    "hip": 620,
+    "torsoLength": 370,
+    "legLength": 450,
+    "shoulderWidth": 300
+  },
+  "constraints": [
+    { "controlPointId": "cp-chest", "min": 500, "max": 800 },
+    { "controlPointId": "cp-waist", "min": 400, "max": 700 },
+    { "controlPointId": "cp-hip", "min": 450, "max": 750 },
+    { "controlPointId": "cp-torso-length", "min": 240, "max": 430 },
+    { "controlPointId": "cp-shoulder-width", "min": 250, "max": 400 },
+    { "controlPointId": "cp-chest", "min": 500, "max": 800, "relatedTo": "cp-waist", "relationship": "greater_than" }
+  ]
+}

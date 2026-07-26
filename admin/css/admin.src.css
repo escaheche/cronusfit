@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .nav-active {
+    @apply bg-brand-gold/10 text-brand-gold border-r-4 border-brand-gold font-semibold;
+  }
+
+  .btn-primary {
+    @apply bg-brand-blue text-white font-semibold px-4 py-2.5 rounded-xl
+           hover:bg-brand-blue-light transition-colors duration-200
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white font-semibold px-4 py-2.5 rounded-xl
+           hover:bg-red-700 transition-colors duration-200;
+  }
+
+  .toast-success {
+    @apply bg-emerald-600 text-white;
+  }
+
+  .toast-error {
+    @apply bg-red-700 text-white;
+  }
+
+  .toast-warn {
+    @apply bg-amber-500 text-brand-blue-dark;
+  }
+}

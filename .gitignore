@@ -1,0 +1,14 @@
+node_modules/
+dist/
+exhibition-site/_site/
+admin/css/admin.css
+*.js.map
+output.json
+response.json
+pattern-camiseta-M.svg
+pattern-camiseta-M-preview.html
+pattern-preview.html
+.aws-sam/
+.env
+.env.*
+*.local

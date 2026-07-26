@@ -1,0 +1,282 @@
+[
+  {
+    "id": "jersey-elite-001",
+    "productName": {
+      "es": "Jersey Elite Pro - Edición Competencia",
+      "en": "Elite Pro Jersey - Competition Edition"
+    },
+    "garmentType": "jersey",
+    "ageGroup": "adult",
+    "availableSizes": ["S", "M", "L", "XL", "2XL"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-20T10:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "jersey-futbol-002",
+    "productName": {
+      "es": "Camiseta Fútbol Sublimada Full Print",
+      "en": "Full Print Sublimated Football Jersey"
+    },
+    "garmentType": "jersey",
+    "ageGroup": "adult",
+    "availableSizes": ["S", "M", "L", "XL", "2XL", "3XL"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-19T14:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "shorts-training-003",
+    "productName": {
+      "es": "Short Deportivo Sublimado con Bolsillos",
+      "en": "Sublimated Training Shorts with Pockets"
+    },
+    "garmentType": "shorts",
+    "ageGroup": "adult",
+    "availableSizes": ["S", "M", "L", "XL"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-18T09:30:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "polera-running-004",
+    "productName": {
+      "es": "Polera Running Dry-Fit Sublimada",
+      "en": "Sublimated Dry-Fit Running Tee"
+    },
+    "garmentType": "jersey",
+    "ageGroup": "adult",
+    "availableSizes": ["XS", "S", "M", "L", "XL", "2XL"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-17T11:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "tank-top-crossfit-005",
+    "productName": {
+      "es": "Musculosa CrossFit Sublimación Total",
+      "en": "CrossFit Tank Top Full Sublimation"
+    },
+    "garmentType": "tank_top",
+    "ageGroup": "adult",
+    "availableSizes": ["S", "M", "L", "XL", "2XL"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-16T15:30:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "leggings-mujer-006",
+    "productName": {
+      "es": "Calzas Deportivas Mujer Sublimadas",
+      "en": "Women's Sublimated Sports Leggings"
+    },
+    "garmentType": "leggings",
+    "ageGroup": "adult",
+    "availableSizes": ["XS", "S", "M", "L", "XL"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-15T08:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "hoodie-urbano-007",
+    "productName": {
+      "es": "Polerón Deportivo con Capucha Sublimado",
+      "en": "Sublimated Sports Hoodie"
+    },
+    "garmentType": "hoodie",
+    "ageGroup": "adult",
+    "availableSizes": ["M", "L", "XL", "2XL", "3XL"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-14T13:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "cortaviento-equipo-008",
+    "productName": {
+      "es": "Cortaviento Equipo Deportivo Sublimado",
+      "en": "Sublimated Team Windbreaker Jacket"
+    },
+    "garmentType": "jacket",
+    "ageGroup": "adult",
+    "availableSizes": ["S", "M", "L", "XL", "2XL"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-13T10:30:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "conjunto-infantil-009",
+    "productName": {
+      "es": "Conjunto Infantil Fútbol Sublimado",
+      "en": "Kids Sublimated Football Kit"
+    },
+    "garmentType": "jersey",
+    "ageGroup": "children",
+    "availableSizes": ["4", "6", "8", "10", "12", "14"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-12T16:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "short-infantil-010",
+    "productName": {
+      "es": "Short Infantil Deportivo Sublimado",
+      "en": "Kids Sublimated Sports Shorts"
+    },
+    "garmentType": "shorts",
+    "ageGroup": "children",
+    "availableSizes": ["4", "6", "8", "10", "12"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-11T09:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "polera-infantil-011",
+    "productName": {
+      "es": "Polera Infantil Sublimada Escolar",
+      "en": "Kids Sublimated School Tee"
+    },
+    "garmentType": "jersey",
+    "ageGroup": "children",
+    "availableSizes": ["4", "6", "8", "10", "12", "14", "16"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-10T14:30:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "dtf-transfer-012",
+    "productName": {
+      "es": "Transfer DTF Full Color - Lámina A3",
+      "en": "DTF Full Color Transfer - A3 Sheet"
+    },
+    "garmentType": "dtf",
+    "ageGroup": "adult",
+    "availableSizes": ["A4", "A3", "A3+", "60cm"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-09T11:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "dtf-personalizado-013",
+    "productName": {
+      "es": "DTF Personalizado - Logo Empresas y Equipos",
+      "en": "Custom DTF - Business & Team Logos"
+    },
+    "garmentType": "dtf",
+    "ageGroup": "adult",
+    "availableSizes": ["A5", "A4", "A3", "A3+"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-08T08:30:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "dtf-numeros-014",
+    "productName": {
+      "es": "DTF Números y Nombres para Camisetas",
+      "en": "DTF Numbers & Names for Jerseys"
+    },
+    "garmentType": "dtf",
+    "ageGroup": "adult",
+    "availableSizes": ["5cm", "8cm", "10cm", "15cm"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-07T10:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "encuadernacion-anillado-015",
+    "productName": {
+      "es": "Encuadernación Anillado - Tesis y Documentos",
+      "en": "Wire Binding - Thesis & Documents"
+    },
+    "garmentType": "encuadernacion",
+    "ageGroup": "adult",
+    "availableSizes": ["Carta", "Oficio", "A4"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-06T13:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "encuadernacion-tapa-dura-016",
+    "productName": {
+      "es": "Encuadernación Tapa Dura - Proyectos y Libros",
+      "en": "Hardcover Binding - Projects & Books"
+    },
+    "garmentType": "encuadernacion",
+    "ageGroup": "adult",
+    "availableSizes": ["Carta", "Oficio", "A4", "A3"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-05T09:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "encuadernacion-hotmelt-017",
+    "productName": {
+      "es": "Encuadernación Hotmelt - Informes y Manuales",
+      "en": "Hotmelt Binding - Reports & Manuals"
+    },
+    "garmentType": "encuadernacion",
+    "ageGroup": "adult",
+    "availableSizes": ["Carta", "Oficio", "A4"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-04T15:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "impresion-plotter-018",
+    "productName": {
+      "es": "Impresión Plotter Gran Formato - Banners y Lienzos",
+      "en": "Large Format Plotter Print - Banners & Canvas"
+    },
+    "garmentType": "impresion",
+    "ageGroup": "adult",
+    "availableSizes": ["60cm", "90cm", "120cm", "150cm"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-03T11:30:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "taza-sublimada-019",
+    "productName": {
+      "es": "Taza Sublimada Personalizada",
+      "en": "Custom Sublimated Mug"
+    },
+    "garmentType": "sublimacion",
+    "ageGroup": "adult",
+    "availableSizes": ["11oz", "15oz", "Mágica"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-02T08:00:00Z",
+    "publishedBy": "admin-001"
+  },
+  {
+    "id": "cojin-sublimado-020",
+    "productName": {
+      "es": "Cojín Sublimado Personalizado",
+      "en": "Custom Sublimated Pillow"
+    },
+    "garmentType": "sublimacion",
+    "ageGroup": "adult",
+    "availableSizes": ["30x30", "40x40", "50x50"],
+    "frontImageS3Key": "/assets/images/logo-cronusfit.png",
+    "backImageS3Key": "/assets/images/logo-cronusfit.png",
+    "publishedAt": "2024-12-01T10:00:00Z",
+    "publishedBy": "admin-001"
+  }
+]

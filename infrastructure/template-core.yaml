@@ -1,0 +1,279 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >-
+  CronusFit Core Infrastructure — DynamoDB, Cognito, Secrets Manager, S3 Assets.
+  This stack provisions shared resources referenced by the main template.yaml.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues:
+      - dev
+      - prod
+  AdminEmail:
+    Type: String
+    Description: Admin email address (Cognito pre-verified)
+  AssetsBucketName:
+    Type: String
+    Default: cronusfit-assets
+    Description: S3 bucket for pattern SVGs, mockup images, and design files
+
+Resources:
+  # ============================================================
+  # DynamoDB — CronusFit Single-Table (Req 11.4)
+  # ============================================================
+  CronusFitTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: CronusFit
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: GSI1PK
+          AttributeType: S
+        - AttributeName: GSI1SK
+          AttributeType: S
+        - AttributeName: GSI2PK
+          AttributeType: S
+        - AttributeName: GSI2SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - AttributeName: GSI1PK
+              KeyType: HASH
+            - AttributeName: GSI1SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: GSI2
+          KeySchema:
+            - AttributeName: GSI2PK
+              KeyType: HASH
+            - AttributeName: GSI2SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: false
+      Tags:
+        - Key: Project
+          Value: CronusFit
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ============================================================
+  # Cognito User Pool — Admin Authentication (Req 13.8, 13.9)
+  # ============================================================
+  AdminUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub cronusfit-admin-pool-${Environment}
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      MfaConfiguration: 'OFF'
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          TemporaryPasswordValidityDays: 7
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+        InviteMessageTemplate:
+          EmailSubject: 'CronusFit — Tu cuenta de administrador'
+          EmailMessage: 'Hola {username}, tu cuenta de administrador ha sido creada. Tu contraseña temporal es {####}. Inicia sesión en la plataforma para cambiarla.'
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+      UserPoolTags:
+        Project: CronusFit
+        Environment: !Ref Environment
+
+  # ============================================================
+  # Cognito User Pool Client — Admin SPA
+  # ============================================================
+  AdminUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub cronusfit-admin-spa-${Environment}
+      UserPoolId: !Ref AdminUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+      PreventUserExistenceErrors: ENABLED
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days
+      SupportedIdentityProviders:
+        - COGNITO
+
+  # ============================================================
+  # Secrets Manager — WAHA / n8n Credentials (Req 11.1)
+  # ============================================================
+  WahaApiKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub cronusfit/waha-api-key-${Environment}
+      Description: WAHA (WhatsApp HTTP API) authentication key for outbound message sending
+      SecretString: '{"apiKey": "REPLACE_WITH_WAHA_API_KEY"}'
+      Tags:
+        - Key: Project
+          Value: CronusFit
+        - Key: Environment
+          Value: !Ref Environment
+
+  WahaWebhookSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub cronusfit/waha-webhook-secret-${Environment}
+      Description: Shared secret for authenticating inbound WAHA webhook callbacks
+      SecretString: '{"webhookSecret": "REPLACE_WITH_WEBHOOK_SECRET"}'
+      Tags:
+        - Key: Project
+          Value: CronusFit
+        - Key: Environment
+          Value: !Ref Environment
+
+  N8nWebhookUrlSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub cronusfit/n8n-webhook-url-${Environment}
+      Description: n8n workflow webhook URL for WhatsApp message orchestration
+      SecretString: '{"webhookUrl": "REPLACE_WITH_N8N_WEBHOOK_URL"}'
+      Tags:
+        - Key: Project
+          Value: CronusFit
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ============================================================
+  # S3 — Assets Bucket (pattern SVGs, mockup images, design files)
+  # ============================================================
+  AssetsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AssetsBucketName}-${Environment}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldVersions
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 30
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+            AllowedOrigins:
+              - '*'
+            MaxAge: 3600
+      Tags:
+        - Key: Project
+          Value: CronusFit
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  CronusFitTableName:
+    Description: DynamoDB table name for the CronusFit single-table
+    Value: !Ref CronusFitTable
+    Export:
+      Name: !Sub ${AWS::StackName}-TableName
+
+  CronusFitTableArn:
+    Description: DynamoDB table ARN
+    Value: !GetAtt CronusFitTable.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-TableArn
+
+  AdminUserPoolId:
+    Description: Cognito User Pool ID for admin authentication
+    Value: !Ref AdminUserPool
+    Export:
+      Name: !Sub ${AWS::StackName}-UserPoolId
+
+  AdminUserPoolArn:
+    Description: Cognito User Pool ARN (pass to main template as CognitoUserPoolArn parameter)
+    Value: !GetAtt AdminUserPool.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-UserPoolArn
+
+  AdminUserPoolClientId:
+    Description: Cognito User Pool Client ID for the Admin SPA
+    Value: !Ref AdminUserPoolClient
+    Export:
+      Name: !Sub ${AWS::StackName}-UserPoolClientId
+
+  AssetsBucketName:
+    Description: S3 bucket name for pattern SVGs, mockup images, and design files
+    Value: !Ref AssetsBucket
+    Export:
+      Name: !Sub ${AWS::StackName}-AssetsBucketName
+
+  AssetsBucketArn:
+    Description: S3 assets bucket ARN
+    Value: !GetAtt AssetsBucket.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-AssetsBucketArn
+
+  WahaApiKeySecretArn:
+    Description: ARN of the WAHA API key secret
+    Value: !Ref WahaApiKeySecret
+    Export:
+      Name: !Sub ${AWS::StackName}-WahaApiKeySecretArn
+
+  WahaWebhookSecretArn:
+    Description: ARN of the WAHA webhook shared secret
+    Value: !Ref WahaWebhookSecret
+    Export:
+      Name: !Sub ${AWS::StackName}-WahaWebhookSecretArn
+
+  N8nWebhookUrlSecretArn:
+    Description: ARN of the n8n webhook URL secret
+    Value: !Ref N8nWebhookUrlSecret
+    Export:
+      Name: !Sub ${AWS::StackName}-N8nWebhookUrlSecretArn

@@ -1,0 +1,71 @@
+{
+  "id": "tpl-adult-legging",
+  "garmentType": "legging",
+  "ageGroup": "adult",
+  "proportionProfile": {
+    "ageGroup": "adult",
+    "headToBodyRatio": 0.133,
+    "limbToTorsoRatio": 1.2,
+    "waistPositionRatio": 0.42,
+    "shoulderToHipRatio": 1.1
+  },
+  "pieces": [
+    {
+      "id": "panel-frontal",
+      "controlPoints": [
+        { "id": "cp-hip-front", "name": "Ancho cadera frontal", "x": 160, "y": 60, "minValue": 400, "maxValue": 675, "affectedPieces": ["panel-frontal"], "measurementRef": "hip", "scaleFactor": 0.5, "min": 400, "max": 675 },
+        { "id": "cp-waist-front", "name": "Ancho cintura frontal", "x": 150, "y": 20, "minValue": 300, "maxValue": 600, "affectedPieces": ["panel-frontal"], "measurementRef": "waist", "scaleFactor": 0.5, "min": 300, "max": 600 },
+        { "id": "cp-leg-front", "name": "Largo pierna frontal", "x": 80, "y": 700, "minValue": 600, "maxValue": 850, "affectedPieces": ["panel-frontal"], "measurementRef": "legLength", "scaleFactor": 0.85, "min": 600, "max": 850 }
+      ],
+      "seamAllowanceMm": 15,
+      "grainLineAngle": 90,
+      "notchPositions": [0.2, 0.5, 0.8]
+    },
+    {
+      "id": "panel-trasero",
+      "controlPoints": [
+        { "id": "cp-hip-back", "name": "Ancho cadera trasero", "x": 170, "y": 60, "minValue": 420, "maxValue": 700, "affectedPieces": ["panel-trasero"], "measurementRef": "hip", "scaleFactor": 0.52, "min": 420, "max": 700 },
+        { "id": "cp-waist-back", "name": "Ancho cintura trasero", "x": 160, "y": 20, "minValue": 310, "maxValue": 620, "affectedPieces": ["panel-trasero"], "measurementRef": "waist", "scaleFactor": 0.52, "min": 310, "max": 620 },
+        { "id": "cp-leg-back", "name": "Largo pierna trasero", "x": 85, "y": 710, "minValue": 610, "maxValue": 860, "affectedPieces": ["panel-trasero"], "measurementRef": "legLength", "scaleFactor": 0.87, "min": 610, "max": 860 }
+      ],
+      "seamAllowanceMm": 15,
+      "grainLineAngle": 90,
+      "notchPositions": [0.2, 0.5, 0.8]
+    },
+    {
+      "id": "pretina",
+      "controlPoints": [
+        { "id": "cp-waistband", "name": "Ancho pretina", "x": 400, "y": 25, "minValue": 600, "maxValue": 1200, "affectedPieces": ["pretina"], "measurementRef": "waist", "scaleFactor": 1.0, "min": 600, "max": 1200 }
+      ],
+      "seamAllowanceMm": 15,
+      "grainLineAngle": 0,
+      "notchPositions": [0.25, 0.5, 0.75]
+    }
+  ],
+  "controlPoints": [
+    { "id": "cp-waist", "name": "Contorno de cintura", "x": 150, "y": 20, "minValue": 600, "maxValue": 1200, "affectedPieces": ["panel-frontal", "panel-trasero", "pretina"], "measurementRef": "waist", "scaleFactor": 1.0, "min": 600, "max": 1200 },
+    { "id": "cp-hip", "name": "Contorno de cadera", "x": 160, "y": 60, "minValue": 800, "maxValue": 1350, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "hip", "scaleFactor": 1.0, "min": 800, "max": 1350 },
+    { "id": "cp-leg-length", "name": "Largo de pierna", "x": 80, "y": 700, "minValue": 700, "maxValue": 1000, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "legLength", "scaleFactor": 0.85, "min": 700, "max": 1000 },
+    { "id": "cp-torso-length", "name": "Largo de torso", "x": 80, "y": 280, "minValue": 420, "maxValue": 640, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "torsoLength", "scaleFactor": 0.35, "min": 420, "max": 640 }
+  ],
+  "pieceDefinitions": [
+    { "id": "panel-frontal", "name": "Panel frontal", "cutQuantity": 2, "pathFunction": "legging_front_panel", "grainLineAngle": 90, "notchPositions": [{ "edgeId": "inseam", "position": 0.5, "matchingPieceEdgeId": "panel-trasero:inseam" }, { "edgeId": "waist-top", "position": 0.5, "matchingPieceEdgeId": "pretina:bottom" }] },
+    { "id": "panel-trasero", "name": "Panel trasero", "cutQuantity": 2, "pathFunction": "legging_back_panel", "grainLineAngle": 90, "notchPositions": [{ "edgeId": "inseam", "position": 0.5, "matchingPieceEdgeId": "panel-frontal:inseam" }, { "edgeId": "waist-top", "position": 0.5, "matchingPieceEdgeId": "pretina:bottom" }] },
+    { "id": "pretina", "name": "Pretina", "cutQuantity": 1, "pathFunction": "legging_waistband", "grainLineAngle": 0, "notchPositions": [{ "edgeId": "bottom", "position": 0.25, "matchingPieceEdgeId": "panel-frontal:waist-top" }, { "edgeId": "bottom", "position": 0.75, "matchingPieceEdgeId": "panel-trasero:waist-top" }] }
+  ],
+  "defaultMeasurements": {
+    "chest": 1000,
+    "waist": 780,
+    "hip": 980,
+    "torsoLength": 600,
+    "legLength": 820,
+    "shoulderWidth": 460
+  },
+  "constraints": [
+    { "controlPointId": "cp-waist", "min": 600, "max": 1200 },
+    { "controlPointId": "cp-hip", "min": 800, "max": 1350 },
+    { "controlPointId": "cp-leg-length", "min": 700, "max": 1000 },
+    { "controlPointId": "cp-torso-length", "min": 420, "max": 640 },
+    { "controlPointId": "cp-hip", "min": 800, "max": 1350, "relatedTo": "cp-waist", "relationship": "greater_than" }
+  ]
+}

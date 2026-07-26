@@ -1,0 +1,183 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo - CronusFit</title>
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="bg-brand-blue/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20">
+        <a href="/" class="flex items-center gap-3 group" aria-label="CronusFit Home">
+          <img src="/assets/images/logo-cronusfit.png" alt="CronusFit" class="h-10 sm:h-12 w-auto transition-transform group-hover:scale-110 duration-300">
+          <div class="hidden sm:block">
+            <span class="text-white font-bold text-xl tracking-tight">CronusFit</span>
+            <span class="block text-brand-gold text-[10px] font-medium uppercase tracking-[0.2em]">Sportswear</span>
+          </div>
+        </a>
+        <nav class="flex items-center gap-3 sm:gap-6" aria-label="Main navigation">
+          <a href="/" class="nav-link text-white/90 hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.home">Inicio</a>
+          <a href="/products/" class="nav-link text-brand-gold font-semibold text-sm sm:text-base" data-i18n="nav.products">Productos</a>
+          <a href="/cotizacion/" class="nav-link text-white/90 hover:text-brand-gold transition-colors text-sm sm:text-base font-medium hidden sm:inline" data-i18n="nav.quote">Cotización</a>
+          <a href="/estado/" class="nav-link text-white/90 hover:text-brand-gold transition-colors text-sm sm:text-base font-medium hidden lg:inline" data-i18n="nav.status">Estado</a>
+          <button id="lang-switcher" class="ml-2 text-xs sm:text-sm font-bold text-brand-blue bg-brand-gold hover:bg-brand-gold-light rounded-full px-3 py-1.5 transition-all duration-300 hover:shadow-lg hover:shadow-brand-gold/30" data-i18n="nav.language" aria-label="Switch language">EN</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Header -->
+  <section class="bg-brand-blue py-10 sm:py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl sm:text-4xl font-bold text-white" data-i18n="nav.products">Catálogo de Productos</h1>
+      <p class="text-white/60 mt-2 text-lg">Explora nuestra colección completa de ropa deportiva sublimada</p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="flex-1 py-10 sm:py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Filter Bar -->
+      <div class="glass-card rounded-2xl p-4 sm:p-6 mb-8 sm:mb-10 shadow-sm">
+        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <!-- Garment Type Filter -->
+          <div class="flex flex-col gap-1.5">
+            <label for="filter-garment-type" class="text-xs font-semibold text-gray-500 uppercase tracking-wider" data-i18n="filter.garment_type">Tipo de prenda</label>
+            <select id="filter-garment-type" class="filter-select">
+              <option value="" data-i18n="filter.all_garment_types">Todas las categorías</option>
+              <option value="jersey">Poleras y Camisetas</option>
+              <option value="shorts">Shorts</option>
+              <option value="tank_top">Musculosas</option>
+              <option value="leggings">Calzas</option>
+              <option value="hoodie">Polerones</option>
+              <option value="jacket">Cortavientos</option>
+              <option value="dtf">Transfer DTF</option>
+              <option value="encuadernacion">Encuadernación</option>
+              <option value="sublimacion">Sublimación Objetos</option>
+              <option value="impresion">Impresión Gran Formato</option>
+            </select>
+          </div>
+
+          <!-- Age Group Filter -->
+          <div class="flex flex-col gap-1.5">
+            <label for="filter-age-group" class="text-xs font-semibold text-gray-500 uppercase tracking-wider" data-i18n="filter.age_group">Grupo etario</label>
+            <select id="filter-age-group" class="filter-select">
+              <option value="" data-i18n="filter.all_age_groups">Todos</option>
+              <option value="children" data-i18n="product.age_group.children">Infantil</option>
+              <option value="adult" data-i18n="product.age_group.adult">Adulto</option>
+            </select>
+          </div>
+
+          <!-- Results Count -->
+          <div class="sm:ml-auto self-end sm:self-center">
+            <span id="filter-results-count" class="text-sm font-semibold text-brand-blue bg-brand-blue/5 px-4 py-2 rounded-full" data-i18n="filter.results_count"></span>
+          </div>
+        </div>
+      </div>
+
+      {% set sortedProducts = products | sort(true, false, 'publishedAt') %}
+
+      {% if sortedProducts.length > 0 %}
+      <!-- Product Grid -->
+      <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+        {% for product in sortedProducts %}
+        <a href="/products/{{ product.id }}/"
+           class="product-card group block bg-white rounded-2xl shadow-sm hover:shadow-2xl overflow-hidden border border-gray-100/50"
+           data-garment-type="{{ product.garmentType }}"
+           data-age-group="{{ product.ageGroup }}"
+           data-product-id="{{ product.id }}">
+          <!-- Product Image -->
+          <div class="aspect-[3/4] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 relative">
+            <img
+              src="{{ product.frontImageS3Key }}"
+              alt="{{ product.productName.es }}"
+              loading="lazy"
+              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
+              onerror="this.onerror=null;this.src='/assets/images/logo-cronusfit.png';this.classList.add('p-12','opacity-20');"
+            >
+            <div class="absolute inset-0 bg-brand-blue/0 group-hover:bg-brand-blue/10 transition-colors duration-300 flex items-center justify-center">
+              <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white text-brand-blue font-semibold text-sm px-4 py-2 rounded-full shadow-lg">
+                Ver detalle →
+              </span>
+            </div>
+            {% if product.ageGroup == "children" %}
+            <span class="absolute top-3 left-3 bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm">Infantil</span>
+            {% endif %}
+          </div>
+          <!-- Product Info -->
+          <div class="p-5">
+            <h2 class="text-brand-blue font-bold text-base mb-3 line-clamp-2 group-hover:text-brand-gold transition-colors duration-300" data-i18n-product-name data-product-name-es="{{ product.productName.es }}" data-product-name-en="{{ product.productName.en }}">
+              {{ product.productName.es }}
+            </h2>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              {% for size in product.availableSizes %}
+              <span class="size-badge">{{ size }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination Controls -->
+      <nav id="pagination-controls" class="flex items-center justify-center gap-4 mt-12" aria-label="Product pagination">
+        <button id="pagination-prev" class="px-5 py-2.5 text-sm font-semibold text-white bg-brand-blue rounded-full hover:bg-brand-blue-light transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm" disabled>
+          ← Anterior
+        </button>
+        <span id="pagination-info" class="text-sm font-medium text-gray-500"></span>
+        <button id="pagination-next" class="px-5 py-2.5 text-sm font-semibold text-white bg-brand-blue rounded-full hover:bg-brand-blue-light transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm" disabled>
+          Siguiente →
+        </button>
+      </nav>
+
+      {% else %}
+      <div id="empty-state-no-products" class="text-center py-20">
+        <div class="w-24 h-24 mx-auto mb-8 rounded-full bg-gray-100 flex items-center justify-center">
+          <img src="/assets/images/logo-cronusfit.png" alt="" class="h-12 opacity-30" aria-hidden="true">
+        </div>
+        <p class="text-gray-400 text-xl font-medium" data-i18n="home.no_products">No hay productos disponibles actualmente.</p>
+      </div>
+      {% endif %}
+
+      <!-- Empty State: No Filter Matches -->
+      <div id="empty-state-no-results" class="text-center py-20 hidden">
+        <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+          <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <p class="text-gray-400 text-lg font-medium" data-i18n="filter.no_results">No se encontraron productos con los filtros seleccionados.</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-brand-blue-dark text-white py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <img src="/assets/images/logo-cronusfit.png" alt="CronusFit" class="h-8 w-auto">
+          <span class="font-bold">CronusFit</span>
+        </div>
+        <p class="text-sm text-white/40">&copy; 2024 CronusFit. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/assets/js/i18n.js"></script>
+  <script src="/assets/js/lang-switcher.js"></script>
+  <script src="/assets/js/products-filter.js"></script>
+</body>
+</html>

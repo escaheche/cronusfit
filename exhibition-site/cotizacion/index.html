@@ -1,0 +1,317 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicitar Cotización - CronusFit</title>
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="icon" href="/favicon.ico">
+  <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+</head>
+<body class="bg-white text-brand-blue min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-brand-blue shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo + Brand -->
+        <a href="/" class="flex items-center gap-3" aria-label="CronusFit Home">
+          <img src="/assets/images/logo-cronusfit.png" alt="CronusFit" class="h-10 w-auto">
+          <span class="text-white font-bold text-xl hidden sm:inline">CronusFit</span>
+        </a>
+
+        <!-- Navigation -->
+        <nav class="flex items-center gap-4 sm:gap-6" aria-label="Main navigation">
+          <a href="/" class="text-white hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.home">Inicio</a>
+          <a href="/products/" class="text-white hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.products">Productos</a>
+          <a href="/cotizacion/" class="text-white hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.quote">Solicitar Cotización</a>
+          <a href="/estado/" class="text-white hover:text-brand-gold transition-colors text-sm sm:text-base font-medium hidden md:inline" data-i18n="nav.status">Estado de Cotización</a>
+          <button id="lang-switcher" class="text-brand-gold hover:text-brand-gold-light transition-colors text-sm font-medium border border-brand-gold rounded px-2 py-1" data-i18n="nav.language" aria-label="Switch language">English</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 py-12 sm:py-16">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Page Title -->
+      <h1 class="text-2xl sm:text-3xl font-bold text-brand-blue mb-8 text-center" data-i18n="quote.title">Solicitar Cotización</h1>
+
+      <!-- Success Message (hidden by default) -->
+      <div id="quote-success" class="hidden bg-green-50 border border-green-200 rounded-lg p-6 text-center mb-8" role="alert" aria-live="polite">
+        <svg class="w-12 h-12 text-green-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p id="quote-success-message" class="text-green-700 font-medium text-lg"></p>
+      </div>
+
+      <!-- Error Banner (hidden by default) -->
+      <div id="quote-error-banner" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6" role="alert" aria-live="polite">
+        <p id="quote-error-banner-message" class="text-red-700 text-sm font-medium"></p>
+      </div>
+
+      <!-- hCaptcha Unavailable Message (hidden by default) -->
+      <div id="captcha-unavailable" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6" role="alert" aria-live="polite">
+        <p class="text-yellow-700 text-sm font-medium" data-i18n="error.captcha_unavailable">El formulario no está disponible temporalmente. Intenta de nuevo en unos momentos.</p>
+      </div>
+
+      <!-- Quote Form -->
+      <form id="quote-form" class="space-y-6" novalidate>
+
+        <!-- Name Field -->
+        <div>
+          <label for="quote-name" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.name">Nombre completo</label>
+          <input
+            type="text"
+            id="quote-name"
+            name="clientName"
+            required
+            minlength="1"
+            maxlength="100"
+            autocomplete="name"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors"
+            data-i18n-placeholder="quote.name"
+            placeholder="Nombre completo"
+            aria-required="true"
+          >
+          <p id="error-name" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Email Field -->
+        <div>
+          <label for="quote-email" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.email">Correo electrónico</label>
+          <input
+            type="email"
+            id="quote-email"
+            name="email"
+            required
+            autocomplete="email"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors"
+            data-i18n-placeholder="quote.email"
+            placeholder="Correo electrónico"
+            aria-required="true"
+          >
+          <p id="error-email" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Phone Field -->
+        <div>
+          <label for="quote-phone" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.phone">Teléfono (WhatsApp)</label>
+          <input
+            type="tel"
+            id="quote-phone"
+            name="phone"
+            required
+            autocomplete="tel"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors"
+            data-i18n-placeholder="quote.phone"
+            placeholder="Teléfono (WhatsApp)"
+            aria-required="true"
+            aria-describedby="phone-hint"
+          >
+          <p id="phone-hint" class="text-gray-500 text-xs mt-1">+56 9 1234 5678</p>
+          <p id="error-phone" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Product Field (hidden/readonly, pre-filled from URL param) -->
+        <div id="product-field-container">
+          <label for="quote-product" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.product">Producto</label>
+          <input
+            type="text"
+            id="quote-product"
+            name="productId"
+            required
+            readonly
+            class="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+            aria-required="true"
+          >
+          <p id="error-product" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Quantity Field -->
+        <div>
+          <label for="quote-quantity" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.quantity">Cantidad</label>
+          <input
+            type="number"
+            id="quote-quantity"
+            name="quantity"
+            required
+            min="1"
+            max="10000"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors"
+            placeholder="1"
+            aria-required="true"
+          >
+          <p id="error-quantity" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Age Group Field -->
+        <div>
+          <label for="quote-age-group" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.age_group">Grupo etario</label>
+          <select
+            id="quote-age-group"
+            name="ageGroup"
+            required
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors bg-white"
+            aria-required="true"
+          >
+            <option value="" data-i18n="quote.age_group.placeholder">Selecciona un grupo etario</option>
+            <option value="children" data-i18n="quote.age_group.children">Infantil</option>
+            <option value="adult" data-i18n="quote.age_group.adult">Adulto</option>
+          </select>
+          <p id="error-age-group" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Sizes Field (checkboxes, shown based on age group) -->
+        <div id="sizes-container" class="hidden">
+          <fieldset>
+            <legend class="block text-sm font-medium text-gray-700 mb-2" data-i18n="quote.sizes">Tallas deseadas</legend>
+            <!-- Children sizes -->
+            <div id="sizes-children" class="hidden flex flex-wrap gap-3">
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="2T" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">2T</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="4" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">4</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="6" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">6</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="8" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">8</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="10" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">10</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="12" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">12</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="14" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">14</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="16" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">16</span>
+              </label>
+            </div>
+            <!-- Adult sizes -->
+            <div id="sizes-adult" class="hidden flex flex-wrap gap-3">
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="XS" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">XS</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="S" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">S</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="M" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">M</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="L" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">L</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="XL" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">XL</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="2XL" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">2XL</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="3XL" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">3XL</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="4XL" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">4XL</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="5XL" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">5XL</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="6XL" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">6XL</span>
+              </label>
+            </div>
+          </fieldset>
+          <p id="error-sizes" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Notes Field -->
+        <div>
+          <label for="quote-notes" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.notes">Notas de personalización (opcional)</label>
+          <textarea
+            id="quote-notes"
+            name="customizationNotes"
+            maxlength="1000"
+            rows="4"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors resize-y"
+            data-i18n-placeholder="quote.notes"
+            placeholder="Notas de personalización (opcional)"
+          ></textarea>
+          <p class="text-gray-500 text-xs mt-1"><span id="notes-char-count">0</span>/1000</p>
+        </div>
+
+        <!-- hCaptcha Widget -->
+        <div class="relative">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Verificación de seguridad</label>
+          <div id="hcaptcha-container" class="rounded-lg overflow-visible border border-gray-200 bg-gray-50 p-4 min-h-[120px]">
+            <div id="hcaptcha-widget" class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001" data-callback="onCaptchaSuccess" data-expired-callback="onCaptchaExpired" data-error-callback="onCaptchaError"></div>
+          </div>
+          <p id="error-captcha" class="text-red-600 text-xs mt-2 hidden" role="alert" aria-live="polite" data-i18n="quote.error.captcha">Por favor completa la verificación CAPTCHA</p>
+          <p class="text-gray-400 text-xs mt-1">Protegido por hCaptcha — <a href="https://www.hcaptcha.com/privacy" class="underline hover:text-brand-blue" target="_blank" rel="noopener">Privacidad</a></p>
+        </div>
+
+        <!-- Submit Button -->
+        <div>
+          <button
+            type="submit"
+            id="quote-submit-btn"
+            class="w-full bg-brand-gold hover:bg-brand-gold-light text-brand-blue font-bold text-lg px-8 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            data-i18n="quote.submit"
+          >
+            Enviar Solicitud
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-brand-blue-dark text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <img src="/assets/images/logo-cronusfit.png" alt="CronusFit" class="h-8 w-auto">
+          <span class="font-bold">CronusFit</span>
+        </div>
+        <p class="text-sm text-gray-300">&copy; 2024 CronusFit. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- i18n Scripts -->
+  <script src="/assets/js/i18n.js"></script>
+  <script src="/assets/js/lang-switcher.js"></script>
+
+  <!-- Quote Form Logic -->
+  <script src="/assets/js/quote-form.js"></script>
+</body>
+</html>

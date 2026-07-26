@@ -1,0 +1,87 @@
+{
+  "id": "tpl-adult-camiseta",
+  "garmentType": "camiseta",
+  "ageGroup": "adult",
+  "proportionProfile": {
+    "ageGroup": "adult",
+    "headToBodyRatio": 0.133,
+    "limbToTorsoRatio": 1.2,
+    "waistPositionRatio": 0.42,
+    "shoulderToHipRatio": 1.1
+  },
+  "pieces": [
+    {
+      "id": "panel-frontal",
+      "controlPoints": [
+        { "id": "cp-chest-front", "name": "Ancho pecho frontal", "x": 300, "y": 220, "minValue": 400, "maxValue": 700, "affectedPieces": ["panel-frontal"], "measurementRef": "chest", "scaleFactor": 0.5, "min": 400, "max": 700 },
+        { "id": "cp-waist-front", "name": "Ancho cintura frontal", "x": 280, "y": 360, "minValue": 300, "maxValue": 600, "affectedPieces": ["panel-frontal"], "measurementRef": "waist", "scaleFactor": 0.5, "min": 300, "max": 600 },
+        { "id": "cp-torso-front", "name": "Largo torso frontal", "x": 200, "y": 480, "minValue": 420, "maxValue": 640, "affectedPieces": ["panel-frontal"], "measurementRef": "torsoLength", "scaleFactor": 0.75, "min": 420, "max": 640 },
+        { "id": "cp-shoulder-front", "name": "Ancho hombro frontal", "x": 350, "y": 60, "minValue": 190, "maxValue": 280, "affectedPieces": ["panel-frontal"], "measurementRef": "shoulderWidth", "scaleFactor": 0.5, "min": 190, "max": 280 }
+      ],
+      "seamAllowanceMm": 15,
+      "grainLineAngle": 90,
+      "notchPositions": [0.25, 0.5, 0.75]
+    },
+    {
+      "id": "panel-trasero",
+      "controlPoints": [
+        { "id": "cp-chest-back", "name": "Ancho pecho trasero", "x": 300, "y": 220, "minValue": 400, "maxValue": 700, "affectedPieces": ["panel-trasero"], "measurementRef": "chest", "scaleFactor": 0.5, "min": 400, "max": 700 },
+        { "id": "cp-waist-back", "name": "Ancho cintura trasero", "x": 280, "y": 360, "minValue": 300, "maxValue": 600, "affectedPieces": ["panel-trasero"], "measurementRef": "waist", "scaleFactor": 0.5, "min": 300, "max": 600 },
+        { "id": "cp-torso-back", "name": "Largo torso trasero", "x": 200, "y": 490, "minValue": 430, "maxValue": 650, "affectedPieces": ["panel-trasero"], "measurementRef": "torsoLength", "scaleFactor": 0.77, "min": 430, "max": 650 },
+        { "id": "cp-shoulder-back", "name": "Ancho hombro trasero", "x": 350, "y": 60, "minValue": 190, "maxValue": 280, "affectedPieces": ["panel-trasero"], "measurementRef": "shoulderWidth", "scaleFactor": 0.5, "min": 190, "max": 280 }
+      ],
+      "seamAllowanceMm": 15,
+      "grainLineAngle": 90,
+      "notchPositions": [0.25, 0.5, 0.75]
+    },
+    {
+      "id": "manga-izquierda",
+      "controlPoints": [
+        { "id": "cp-sleeve-width-l", "name": "Ancho manga izquierda", "x": 180, "y": 100, "minValue": 180, "maxValue": 320, "affectedPieces": ["manga-izquierda"], "measurementRef": "chest", "scaleFactor": 0.27, "min": 180, "max": 320 },
+        { "id": "cp-sleeve-length-l", "name": "Largo manga izquierda", "x": 90, "y": 240, "minValue": 180, "maxValue": 320, "affectedPieces": ["manga-izquierda"], "measurementRef": "shoulderWidth", "scaleFactor": 0.55, "min": 180, "max": 320 }
+      ],
+      "seamAllowanceMm": 15,
+      "grainLineAngle": 90,
+      "notchPositions": [0.5]
+    },
+    {
+      "id": "manga-derecha",
+      "controlPoints": [
+        { "id": "cp-sleeve-width-r", "name": "Ancho manga derecha", "x": 180, "y": 100, "minValue": 180, "maxValue": 320, "affectedPieces": ["manga-derecha"], "measurementRef": "chest", "scaleFactor": 0.27, "min": 180, "max": 320 },
+        { "id": "cp-sleeve-length-r", "name": "Largo manga derecha", "x": 90, "y": 240, "minValue": 180, "maxValue": 320, "affectedPieces": ["manga-derecha"], "measurementRef": "shoulderWidth", "scaleFactor": 0.55, "min": 180, "max": 320 }
+      ],
+      "seamAllowanceMm": 15,
+      "grainLineAngle": 90,
+      "notchPositions": [0.5]
+    }
+  ],
+  "controlPoints": [
+    { "id": "cp-chest", "name": "Contorno de pecho", "x": 300, "y": 220, "minValue": 800, "maxValue": 1400, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "chest", "scaleFactor": 1.0, "min": 800, "max": 1400 },
+    { "id": "cp-waist", "name": "Contorno de cintura", "x": 280, "y": 360, "minValue": 600, "maxValue": 1200, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "waist", "scaleFactor": 1.0, "min": 600, "max": 1200 },
+    { "id": "cp-hip", "name": "Contorno de cadera", "x": 290, "y": 440, "minValue": 800, "maxValue": 1350, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "hip", "scaleFactor": 1.0, "min": 800, "max": 1350 },
+    { "id": "cp-torso-length", "name": "Largo de torso", "x": 200, "y": 480, "minValue": 420, "maxValue": 640, "affectedPieces": ["panel-frontal", "panel-trasero"], "measurementRef": "torsoLength", "scaleFactor": 0.75, "min": 420, "max": 640 },
+    { "id": "cp-shoulder-width", "name": "Ancho de hombros", "x": 350, "y": 60, "minValue": 380, "maxValue": 560, "affectedPieces": ["panel-frontal", "panel-trasero", "manga-izquierda", "manga-derecha"], "measurementRef": "shoulderWidth", "scaleFactor": 1.0, "min": 380, "max": 560 }
+  ],
+  "pieceDefinitions": [
+    { "id": "panel-frontal", "name": "Panel frontal", "cutQuantity": 1, "pathFunction": "camiseta_front_panel", "grainLineAngle": 90, "notchPositions": [{ "edgeId": "shoulder", "position": 0.5, "matchingPieceEdgeId": "panel-trasero:shoulder" }, { "edgeId": "side-left", "position": 0.5, "matchingPieceEdgeId": "panel-trasero:side-left" }, { "edgeId": "armhole-left", "position": 0.5, "matchingPieceEdgeId": "manga-izquierda:armhole" }] },
+    { "id": "panel-trasero", "name": "Panel trasero", "cutQuantity": 1, "pathFunction": "camiseta_back_panel", "grainLineAngle": 90, "notchPositions": [{ "edgeId": "shoulder", "position": 0.5, "matchingPieceEdgeId": "panel-frontal:shoulder" }, { "edgeId": "side-left", "position": 0.5, "matchingPieceEdgeId": "panel-frontal:side-left" }, { "edgeId": "armhole-left", "position": 0.5, "matchingPieceEdgeId": "manga-izquierda:armhole" }] },
+    { "id": "manga-izquierda", "name": "Manga izquierda", "cutQuantity": 1, "pathFunction": "camiseta_sleeve", "grainLineAngle": 90, "notchPositions": [{ "edgeId": "armhole", "position": 0.5, "matchingPieceEdgeId": "panel-frontal:armhole-left" }] },
+    { "id": "manga-derecha", "name": "Manga derecha", "cutQuantity": 1, "pathFunction": "camiseta_sleeve", "grainLineAngle": 90, "notchPositions": [{ "edgeId": "armhole", "position": 0.5, "matchingPieceEdgeId": "panel-frontal:armhole-right" }] }
+  ],
+  "defaultMeasurements": {
+    "chest": 1000,
+    "waist": 860,
+    "hip": 1000,
+    "torsoLength": 600,
+    "legLength": 800,
+    "shoulderWidth": 460
+  },
+  "constraints": [
+    { "controlPointId": "cp-chest", "min": 800, "max": 1400 },
+    { "controlPointId": "cp-waist", "min": 600, "max": 1200 },
+    { "controlPointId": "cp-hip", "min": 800, "max": 1350 },
+    { "controlPointId": "cp-torso-length", "min": 420, "max": 640 },
+    { "controlPointId": "cp-shoulder-width", "min": 380, "max": 560 },
+    { "controlPointId": "cp-chest", "min": 800, "max": 1400, "relatedTo": "cp-waist", "relationship": "greater_than" }
+  ]
+}

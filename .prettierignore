@@ -1,0 +1,4 @@
+node_modules/
+dist/
+exhibition-site/_site/
+*.md

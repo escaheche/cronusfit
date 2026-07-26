@@ -1,0 +1,58 @@
+# SAM CLI Deployment Configuration for CronusFit
+# Deploy core stack first, then main stack using core outputs as parameters.
+#
+# Usage:
+#   cd infrastructure
+#   sam build -t template-core.yaml && sam deploy -t template-core.yaml --config-env core
+#   sam build -t template.yaml && sam deploy -t template.yaml --config-env main
+
+version = 0.1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Core Stack: DynamoDB, Cognito, Secrets Manager, S3 Assets
+# ─────────────────────────────────────────────────────────────────────────────
+[core.deploy.parameters]
+stack_name = "cronusfit-core-prod"
+resolve_s3 = true
+s3_prefix = "cronusfit-core"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=prod AdminEmail=REPLACE_WITH_ADMIN_EMAIL AssetsBucketName=cronusfit-assets"
+tags = "Project=CronusFit Environment=prod"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Main Stack: API Gateway, Lambda Functions, Exhibition Site, CloudFront
+# ─────────────────────────────────────────────────────────────────────────────
+[main.deploy.parameters]
+stack_name = "cronusfit-exhibition-prod"
+resolve_s3 = true
+s3_prefix = "cronusfit-exhibition"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
+parameter_overrides = "Environment=prod CognitoUserPoolArn=REPLACE_WITH_CORE_OUTPUT_USER_POOL_ARN DynamoDBTableName=CronusFit ExhibitionBucketName=cronusfit-exhibition AdminEmail=REPLACE_WITH_ADMIN_EMAIL SenderEmail=REPLACE_WITH_SENDER_EMAIL"
+tags = "Project=CronusFit Environment=prod"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dev environment overrides
+# ─────────────────────────────────────────────────────────────────────────────
+[core-dev.deploy.parameters]
+stack_name = "cronusfit-core-dev"
+resolve_s3 = true
+s3_prefix = "cronusfit-core-dev"
+region = "us-east-1"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=dev AdminEmail=REPLACE_WITH_ADMIN_EMAIL AssetsBucketName=cronusfit-assets"
+tags = "Project=CronusFit Environment=dev"
+
+[main-dev.deploy.parameters]
+stack_name = "cronusfit-exhibition-dev"
+resolve_s3 = true
+s3_prefix = "cronusfit-exhibition-dev"
+region = "us-east-1"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
+parameter_overrides = "Environment=dev CognitoUserPoolArn=REPLACE_WITH_CORE_OUTPUT_USER_POOL_ARN DynamoDBTableName=CronusFit ExhibitionBucketName=cronusfit-exhibition AdminEmail=REPLACE_WITH_ADMIN_EMAIL SenderEmail=REPLACE_WITH_SENDER_EMAIL"
+tags = "Project=CronusFit Environment=dev"

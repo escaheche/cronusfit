@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CronusFit - Ropa Deportiva Sublimada</title>
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="bg-brand-blue/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20">
+        <!-- Logo + Brand -->
+        <a href="/" class="flex items-center gap-3 group" aria-label="CronusFit Home">
+          <img src="/assets/images/logo-cronusfit.png" alt="CronusFit" class="h-10 sm:h-12 w-auto transition-transform group-hover:scale-110 duration-300">
+          <div class="hidden sm:block">
+            <span class="text-white font-bold text-xl tracking-tight">CronusFit</span>
+            <span class="block text-brand-gold text-[10px] font-medium uppercase tracking-[0.2em]">Sportswear</span>
+          </div>
+        </a>
+
+        <!-- Navigation -->
+        <nav class="flex items-center gap-3 sm:gap-6" aria-label="Main navigation">
+          <a href="/" class="nav-link text-brand-gold font-semibold text-sm sm:text-base" data-i18n="nav.home">Inicio</a>
+          <a href="/products/" class="nav-link text-white/90 hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.products">Productos</a>
+          <a href="/cotizacion/" class="nav-link text-white/90 hover:text-brand-gold transition-colors text-sm sm:text-base font-medium hidden sm:inline" data-i18n="nav.quote">Cotización</a>
+          <a href="/estado/" class="nav-link text-white/90 hover:text-brand-gold transition-colors text-sm sm:text-base font-medium hidden lg:inline" data-i18n="nav.status">Estado</a>
+          <button id="lang-switcher" class="ml-2 text-xs sm:text-sm font-bold text-brand-blue bg-brand-gold hover:bg-brand-gold-light rounded-full px-3 py-1.5 transition-all duration-300 hover:shadow-lg hover:shadow-brand-gold/30" data-i18n="nav.language" aria-label="Switch language">EN</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="animated-gradient relative overflow-hidden py-20 sm:py-32 lg:py-40">
+    <!-- Decorative elements -->
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute top-10 left-10 w-72 h-72 bg-brand-gold rounded-full blur-3xl"></div>
+      <div class="absolute bottom-10 right-10 w-96 h-96 bg-brand-gold rounded-full blur-3xl"></div>
+    </div>
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDE4YzEuNjU3IDAgMy0xLjM0MyAzLTNzLTEuMzQzLTMtMy0zLTMgMS4zNDMtMyAzIDEuMzQzIDMgMyAzeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"></div>
+    
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="fade-in">
+        <img src="/assets/images/logo-cronusfit.png" alt="" class="h-20 sm:h-28 lg:h-32 mx-auto mb-8 drop-shadow-2xl" aria-hidden="true">
+      </div>
+      <h1 class="fade-in stagger-1 text-4xl sm:text-5xl lg:text-7xl font-black text-white mb-6 text-balance tracking-tight">
+        Ropa Deportiva<br>
+        <span class="gradient-text">Sublimada</span>
+      </h1>
+      <p class="fade-in stagger-2 text-lg sm:text-xl lg:text-2xl text-white/80 font-light max-w-2xl mx-auto mb-10" data-i18n="home.subtitle">
+        Diseños exclusivos de alta calidad para tu equipo
+      </p>
+      <div class="fade-in stagger-3 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="/products/" class="glow-button inline-flex items-center gap-2 bg-brand-gold text-brand-blue font-bold text-lg px-8 py-4 rounded-full shadow-xl hover:shadow-brand-gold/40 transition-all duration-300">
+          <span data-i18n="nav.products">Ver Catálogo</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </a>
+        <a href="/cotizacion/" class="inline-flex items-center gap-2 text-white border-2 border-white/30 hover:border-brand-gold hover:text-brand-gold font-semibold text-lg px-8 py-4 rounded-full transition-all duration-300">
+          <span data-i18n="nav.quote">Solicitar Cotización</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Strip -->
+  <section class="bg-white border-b border-gray-100 py-6 sm:py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
+        <div class="flex items-center gap-3 justify-center">
+          <div class="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+          </div>
+          <span class="text-sm font-semibold text-gray-700">Sublimación Premium</span>
+        </div>
+        <div class="flex items-center gap-3 justify-center">
+          <div class="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+          </div>
+          <span class="text-sm font-semibold text-gray-700">Transfer DTF</span>
+        </div>
+        <div class="flex items-center gap-3 justify-center">
+          <div class="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          </div>
+          <span class="text-sm font-semibold text-gray-700">Encuadernación</span>
+        </div>
+        <div class="flex items-center gap-3 justify-center">
+          <div class="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <span class="text-sm font-semibold text-gray-700">San Pedro de la Paz</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content: Product Showcase -->
+  <main class="flex-1 py-16 sm:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Section Header -->
+      <div class="text-center mb-12 sm:mb-16">
+        <h2 class="text-3xl sm:text-4xl font-bold text-brand-blue mb-4">Últimos Productos</h2>
+        <p class="text-gray-500 text-lg max-w-lg mx-auto">Los diseños más recientes de nuestra colección de ropa deportiva sublimada</p>
+      </div>
+
+      {% set sortedProducts = products | sort(true, false, 'publishedAt') %}
+      {% set homeProducts = sortedProducts.slice(0, 12) %}
+
+      {% if homeProducts.length > 0 %}
+      <!-- Product Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+        {% for product in homeProducts %}
+        <a href="/products/{{ product.id }}/" class="product-card group block bg-white rounded-2xl shadow-sm hover:shadow-2xl overflow-hidden border border-gray-100/50">
+          <!-- Product Image -->
+          <div class="aspect-[3/4] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 relative">
+            <img
+              src="{{ product.frontImageS3Key }}"
+              alt="{{ product.productName.es }}"
+              loading="lazy"
+              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
+              onerror="this.onerror=null;this.src='/assets/images/logo-cronusfit.png';this.classList.add('p-12','opacity-20');"
+            >
+            <!-- Hover overlay -->
+            <div class="absolute inset-0 bg-brand-blue/0 group-hover:bg-brand-blue/10 transition-colors duration-300 flex items-center justify-center">
+              <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white text-brand-blue font-semibold text-sm px-4 py-2 rounded-full shadow-lg">
+                Ver detalle →
+              </span>
+            </div>
+            <!-- Age group badge -->
+            {% if product.ageGroup == "children" %}
+            <span class="absolute top-3 left-3 bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm">Infantil</span>
+            {% endif %}
+          </div>
+          <!-- Product Info -->
+          <div class="p-5">
+            <h3 class="text-brand-blue font-bold text-base mb-3 line-clamp-2 group-hover:text-brand-gold transition-colors duration-300" data-i18n-product-name data-product-name-es="{{ product.productName.es }}" data-product-name-en="{{ product.productName.en }}">
+              {{ product.productName.es }}
+            </h3>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              {% for size in product.availableSizes %}
+              <span class="size-badge">{{ size }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+
+      <!-- View All CTA -->
+      <div class="text-center mt-12 sm:mt-16">
+        <a href="/products/" class="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-light text-white font-semibold text-base px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <span data-i18n="nav.products">Ver todo el catálogo</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </a>
+      </div>
+
+      {% else %}
+      <!-- Empty State -->
+      <div class="text-center py-20">
+        <div class="w-24 h-24 mx-auto mb-8 rounded-full bg-gray-100 flex items-center justify-center">
+          <img src="/assets/images/logo-cronusfit.png" alt="" class="h-12 opacity-30" aria-hidden="true">
+        </div>
+        <p class="text-gray-400 text-xl font-medium" data-i18n="home.no_products">No hay productos disponibles actualmente.</p>
+        <p class="text-gray-400 text-base mt-2">Vuelve pronto para ver nuestros nuevos diseños.</p>
+      </div>
+      {% endif %}
+
+    </div>
+  </main>
+
+  <!-- CTA Section -->
+  <section class="bg-brand-blue py-16 sm:py-20 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-brand-gold rounded-full blur-3xl"></div>
+    </div>
+    <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4 text-balance">¿Necesitas uniformes, DTF o encuadernación?</h2>
+      <p class="text-white/70 text-lg mb-8 max-w-2xl mx-auto">Sublimación deportiva, transfer DTF, encuadernación profesional e impresión de gran formato. Todo desde San Pedro de la Paz, Biobío.</p>
+      <a href="/cotizacion/" class="glow-button inline-flex items-center gap-2 bg-brand-gold text-brand-blue font-bold text-lg px-10 py-4 rounded-full shadow-xl">
+        <span data-i18n="nav.quote">Solicitar Cotización</span>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-brand-blue-dark text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <!-- Brand -->
+        <div class="sm:col-span-2 lg:col-span-1">
+          <div class="flex items-center gap-3 mb-4">
+            <img src="/assets/images/logo-cronusfit.png" alt="CronusFit" class="h-10 w-auto">
+            <div>
+              <span class="font-bold text-lg">CronusFit</span>
+              <span class="block text-brand-gold text-[10px] uppercase tracking-[0.2em]">Sportswear</span>
+            </div>
+          </div>
+          <p class="text-white/60 text-sm leading-relaxed">Ropa deportiva sublimada de alta calidad. Diseños personalizados para equipos y clubes deportivos.</p>
+        </div>
+        <!-- Links -->
+        <div>
+          <h3 class="font-semibold text-sm uppercase tracking-wider text-white/80 mb-4">Navegación</h3>
+          <ul class="space-y-2">
+            <li><a href="/" class="text-white/60 hover:text-brand-gold text-sm transition-colors" data-i18n="nav.home">Inicio</a></li>
+            <li><a href="/products/" class="text-white/60 hover:text-brand-gold text-sm transition-colors" data-i18n="nav.products">Productos</a></li>
+            <li><a href="/cotizacion/" class="text-white/60 hover:text-brand-gold text-sm transition-colors" data-i18n="nav.quote">Solicitar Cotización</a></li>
+            <li><a href="/estado/" class="text-white/60 hover:text-brand-gold text-sm transition-colors" data-i18n="nav.status">Estado de Cotización</a></li>
+          </ul>
+        </div>
+        <!-- Contact hint -->
+        <div>
+          <h3 class="font-semibold text-sm uppercase tracking-wider text-white/80 mb-4">Contacto</h3>
+          <p class="text-white/60 text-sm mb-2">San Pedro de la Paz, Región del Biobío, Chile</p>
+          <p class="text-white/60 text-sm">WhatsApp: +56 9 XXXX XXXX</p>
+          <p class="text-white/60 text-sm mt-2">Solicita tu cotización a través de nuestro formulario en línea.</p>
+        </div>
+      </div>
+      <!-- Bottom bar -->
+      <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-sm text-white/40">&copy; 2024 CronusFit. Todos los derechos reservados.</p>
+        <div class="flex items-center gap-4">
+          <button id="footer-lang-switcher" class="text-xs text-white/60 hover:text-brand-gold transition-colors" data-i18n="nav.language">English</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/assets/js/i18n.js"></script>
+  <script src="/assets/js/lang-switcher.js"></script>
+</body>
+</html>

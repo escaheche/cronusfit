@@ -1,0 +1,185 @@
+---
+pagination:
+  data: products
+  size: 1
+  alias: product
+permalink: "products/{{ product.id }}/index.html"
+layout: false
+---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ product.productName.es }} - CronusFit</title>
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="bg-brand-blue/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20">
+        <a href="/" class="flex items-center gap-3 group" aria-label="CronusFit Home">
+          <img src="/assets/images/logo-cronusfit.png" alt="CronusFit" class="h-10 sm:h-12 w-auto transition-transform group-hover:scale-110 duration-300">
+          <div class="hidden sm:block">
+            <span class="text-white font-bold text-xl tracking-tight">CronusFit</span>
+            <span class="block text-brand-gold text-[10px] font-medium uppercase tracking-[0.2em]">Sportswear</span>
+          </div>
+        </a>
+        <nav class="flex items-center gap-3 sm:gap-6" aria-label="Main navigation">
+          <a href="/" class="nav-link text-white/90 hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.home">Inicio</a>
+          <a href="/products/" class="nav-link text-white/90 hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.products">Productos</a>
+          <a href="/cotizacion/" class="nav-link text-white/90 hover:text-brand-gold transition-colors text-sm sm:text-base font-medium hidden sm:inline" data-i18n="nav.quote">Cotización</a>
+          <button id="lang-switcher" class="ml-2 text-xs sm:text-sm font-bold text-brand-blue bg-brand-gold hover:bg-brand-gold-light rounded-full px-3 py-1.5 transition-all duration-300 hover:shadow-lg hover:shadow-brand-gold/30" data-i18n="nav.language" aria-label="Switch language">EN</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 py-10 sm:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Breadcrumb -->
+      <nav class="mb-8" aria-label="Breadcrumb">
+        <ol class="flex items-center gap-2 text-sm text-gray-400">
+          <li><a href="/" class="hover:text-brand-blue transition-colors font-medium" data-i18n="nav.home">Inicio</a></li>
+          <li class="text-gray-300">/</li>
+          <li><a href="/products/" class="hover:text-brand-blue transition-colors font-medium" data-i18n="nav.products">Productos</a></li>
+          <li class="text-gray-300">/</li>
+          <li class="text-brand-blue font-semibold" data-i18n-product-name data-product-name-es="{{ product.productName.es }}" data-product-name-en="{{ product.productName.en }}">{{ product.productName.es }}</li>
+        </ol>
+      </nav>
+
+      <!-- Product Detail Card -->
+      <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2">
+
+          <!-- Product Images -->
+          <div class="p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-gray-50 to-white">
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Front Image -->
+              <div class="aspect-[3/4] bg-gray-100 rounded-2xl overflow-hidden border border-gray-200/50 shadow-inner">
+                <img
+                  src="{{ product.frontImageS3Key }}"
+                  alt="{{ product.productName.es }} - Vista frontal"
+                  class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  onerror="this.onerror=null;this.src='/assets/images/logo-cronusfit.png';this.classList.add('p-10','opacity-20');"
+                >
+              </div>
+              <!-- Back Image -->
+              <div class="aspect-[3/4] bg-gray-100 rounded-2xl overflow-hidden border border-gray-200/50 shadow-inner">
+                <img
+                  src="{{ product.backImageS3Key }}"
+                  alt="{{ product.productName.es }} - Vista trasera"
+                  class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  onerror="this.onerror=null;this.src='/assets/images/logo-cronusfit.png';this.classList.add('p-10','opacity-20');"
+                >
+              </div>
+            </div>
+            <p class="text-center text-xs text-gray-400 mt-4">Vista frontal · Vista trasera</p>
+          </div>
+
+          <!-- Product Info -->
+          <div class="p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
+            <!-- Product Name -->
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-blue mb-6 leading-tight" data-i18n-product-name data-product-name-es="{{ product.productName.es }}" data-product-name-en="{{ product.productName.en }}">
+              {{ product.productName.es }}
+            </h1>
+
+            <!-- Details Grid -->
+            <div class="space-y-5 mb-8">
+              <!-- Garment Type -->
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-blue/5 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                </div>
+                <div>
+                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider" data-i18n="product.garment_type">Tipo de prenda</span>
+                  <p class="text-brand-blue font-bold capitalize">{{ product.garmentType | replace("_", " ") }}</p>
+                </div>
+              </div>
+
+              <!-- Age Group -->
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-blue/5 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </div>
+                <div>
+                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider" data-i18n="product.age_group_label">Grupo etario</span>
+                  {% if product.ageGroup == "children" %}
+                  <p class="text-brand-blue font-bold" data-i18n="product.age_group.children">Infantil</p>
+                  {% else %}
+                  <p class="text-brand-blue font-bold" data-i18n="product.age_group.adult">Adulto</p>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Available Sizes -->
+              <div>
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-3" data-i18n="product.sizes">Tallas disponibles</span>
+                <div class="flex items-center gap-2 flex-wrap">
+                  {% for size in product.availableSizes %}
+                  <span class="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-brand-blue/5 text-brand-blue text-sm font-bold border-2 border-transparent hover:border-brand-gold hover:bg-brand-gold/10 transition-all duration-200 cursor-default">{{ size }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Sublimation Badge -->
+            <div class="bg-gradient-to-r from-brand-blue/5 to-brand-gold/5 rounded-xl p-4 mb-8 border border-brand-blue/10">
+              <div class="flex items-center gap-3">
+                <svg class="w-6 h-6 text-brand-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                <div>
+                  <p class="text-sm font-bold text-brand-blue">Sublimación a full color</p>
+                  <p class="text-xs text-gray-500">Diseño personalizable con los colores de tu equipo</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Request Quote CTA -->
+            <a href="/cotizacion/?product={{ product.id }}"
+               class="glow-button inline-flex items-center justify-center gap-3 bg-brand-gold text-brand-blue font-bold text-lg px-8 py-4 rounded-full shadow-xl hover:shadow-brand-gold/40 transition-all duration-300 w-full sm:w-auto"
+               data-i18n="product.request_quote">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
+              Solicitar Cotización
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Back to catalog -->
+      <div class="mt-8 text-center">
+        <a href="/products/" class="inline-flex items-center gap-2 text-brand-blue hover:text-brand-gold font-medium transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/></svg>
+          <span data-i18n="nav.products">Volver al catálogo</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-brand-blue-dark text-white py-10 mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <img src="/assets/images/logo-cronusfit.png" alt="CronusFit" class="h-8 w-auto">
+          <span class="font-bold">CronusFit</span>
+        </div>
+        <p class="text-sm text-white/40">&copy; 2024 CronusFit. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/assets/js/i18n.js"></script>
+  <script src="/assets/js/lang-switcher.js"></script>
+</body>
+</html>
