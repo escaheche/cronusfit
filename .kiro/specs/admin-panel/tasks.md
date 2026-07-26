@@ -89,7 +89,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
     - **Validates: Requirements 10.4, 10.5**
 
 
-- [~] 3. Checkpoint — Módulos core
+- [ ] 3. Checkpoint — Módulos core
   - Verificar que router, auth, api, toast y network se cargan sin errores en el navegador
   - Verificar que `AuthGuard.check()` redirige a `#login` cuando no hay JWT en sessionStorage
   - Verificar que `Api.request` adjunta el header `Authorization` correctamente en DevTools
@@ -112,7 +112,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
 
 
 - [ ] 5. Sección Patrones
-  - [~] 5.1 Implementar listado de patrones en `admin/js/sections/patrones.js`
+  - [ ] 5.1 Implementar listado de patrones en `admin/js/sections/patrones.js`
     - En `PatronesSection.render()`: llamar `Api.get('/patterns')`, ordenar por `createdAt` descendente, renderizar tabla/cards con: nombre, tipo de prenda, grupo etario, talla, estado y fecha de creación
     - Mostrar spinner de carga durante la llamada a la API
     - Mostrar `Toast.error` si la llamada falla
@@ -126,7 +126,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
     - **Property 8: Todos los campos requeridos presentes en el rendering de cada item**
     - **Validates: Requirements 3.2**
 
-  - [~] 5.4 Implementar formulario de creación de patrón
+  - [ ] 5.4 Implementar formulario de creación de patrón
     - Al seleccionar "Nuevo patrón", renderizar formulario con campos: `garmentType`, `ageGroup`, `size`, medidas físicas (`measurements`)
     - En `submit` con todos los campos válidos: mostrar spinner en el botón, llamar `Api.post('/patterns/generate', data)`, mostrar `Toast.success` al recibir respuesta exitosa
     - Si la API retorna errores de validación: mapear cada error al campo correspondiente por nombre y mostrarlos inline sin cerrar el formulario
@@ -138,7 +138,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
     - **Property 10: Errores de validación de API se mapean al campo correcto**
     - **Validates: Requirements 3.5**
 
-  - [~] 5.6 Implementar descarga de patrón como PDF con jsPDF
+  - [ ] 5.6 Implementar descarga de patrón como PDF con jsPDF
     - Implementar `downloadPatternPDF(patternId, presignedUrl)`: `fetch(presignedUrl)` → si falla, `Toast.error` y cancelar sin archivo parcial
     - Si el SVG se obtiene: instanciar `jsPDF`, usar `doc.svg(svgElement, {x:10, y:10, width:190, height:277})`, guardar como `patron-{patternId}.pdf`
     - _Requisitos: 3.6, 3.7_
@@ -150,7 +150,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
 
 
 - [ ] 6. Sección Cotizaciones
-  - [~] 6.1 Implementar listado y resumen de cotizaciones en `admin/js/sections/cotizaciones.js`
+  - [ ] 6.1 Implementar listado y resumen de cotizaciones en `admin/js/sections/cotizaciones.js`
     - En `CotizacionesSection.render()`: llamar `Api.get('/quotes')`, calcular contadores por estado en el cliente, renderizar resumen de totales y lista ordenada por `receivedAt` descendente
     - Mostrar por cada cotización: nombre del cliente, producto, cantidad, tallas, estado actual y fecha de recepción
     - _Requisitos: 4.1, 4.2, 4.7_
@@ -161,7 +161,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
     - **Property 8: Todos los campos requeridos presentes en el rendering de cada item**
     - **Validates: Requirements 4.2**
 
-  - [~] 6.3 Implementar filtro por estado y detalle de cotización
+  - [ ] 6.3 Implementar filtro por estado y detalle de cotización
     - Implementar filtro por `pending | quoted | accepted | rejected` operando sobre el array local (sin re-fetch)
     - Al seleccionar una cotización: renderizar detalle completo con datos de contacto, notas de personalización e historial de estados
     - _Requisitos: 4.3, 4.4_
@@ -170,7 +170,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
     - **Property 12: Filtro de estado opera correctamente sobre cualquier lista**
     - **Validates: Requirements 4.3**
 
-  - [~] 6.5 Implementar respuesta de precio a cotización
+  - [ ] 6.5 Implementar respuesta de precio a cotización
     - Al enviar precio en cotización `pending`: mostrar spinner, llamar `Api.put('/quotes/:id', {price, status:'quoted'})`, mostrar `Toast.success` en éxito
     - Si la API retorna error: `Toast.error` persistente, mantener el estado previo en la vista
     - _Requisitos: 4.5, 4.6_
@@ -181,7 +181,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
 
 
 - [ ] 7. Sección Mockups
-  - [~] 7.1 Implementar selector de patrón y validación de archivo en `admin/js/sections/mockups.js`
+  - [ ] 7.1 Implementar selector de patrón y validación de archivo en `admin/js/sections/mockups.js`
     - En `MockupsSection.render()`: llamar `Api.get('/patterns?status=approved')`, renderizar selector `<select>` con los patrones aprobados
     - Implementar `validateDesignFile(file)`: aceptar solo `image/png`, `image/jpeg`, `image/svg+xml` y tamaño ≤ 10 MB; retornar `{ok, reason}` y mostrar mensaje inline en el dropzone sin llamar a la API si inválido
     - _Requisitos: 5.1, 5.2, 5.3_
@@ -190,7 +190,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
     - **Property 11: Validación de archivo de diseño rechaza formatos/tamaños inválidos**
     - **Validates: Requirements 5.2, 5.3**
 
-  - [~] 7.3 Implementar generación de mockup
+  - [ ] 7.3 Implementar generación de mockup
     - Al seleccionar zona de colocación válida y enviar: mostrar spinner de progreso, llamar `Api.post('/mockups/generate', {patternId, designFile, zone})`
     - En éxito: renderizar imágenes frontal y trasera, mostrar `Toast.success` indicando estado `pending_approval`
     - En error: `Toast.error` con el motivo recibido, mantener formulario con los valores ingresados
@@ -203,7 +203,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
 
 
 - [ ] 8. Sección Aprobaciones
-  - [~] 8.1 Implementar cola de aprobaciones en `admin/js/sections/aprobaciones.js`
+  - [ ] 8.1 Implementar cola de aprobaciones en `admin/js/sections/aprobaciones.js`
     - En `AprobacionesSection.render()`: llamar `Api.get('/mockups?status=pending_approval')`, ordenar por `createdAt` ASC (más antiguos primero)
     - Renderizar cada mockup con imágenes frontal y trasera, nombre del patrón, tipo de prenda y fecha de generación
     - Llamar `Sidebar.updateBadge('#aprobaciones', items.length)` después del render
@@ -215,12 +215,12 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
     - **Property 15: Contador de aprobaciones pendientes siempre sincronizado**
     - **Validates: Requirements 6.7**
 
-  - [~] 8.3 Implementar aprobación de mockup
+  - [ ] 8.3 Implementar aprobación de mockup
     - Al pulsar "Aprobar": mostrar spinner, llamar `Api.put('/mockups/:id', {status:'approved'})`, eliminar el item de la cola visible y actualizar el badge, mostrar `Toast.success`
     - En error: `Toast.error`, mantener el mockup en la cola con su estado anterior
     - _Requisitos: 6.3, 6.6_
 
-  - [~] 8.4 Implementar rechazo de mockup con campo de motivo (integra modal.js)
+  - [ ] 8.4 Implementar rechazo de mockup con campo de motivo (integra modal.js)
     - Al pulsar "Rechazar": abrir `Modal` con `<textarea>` para motivo de rechazo
     - Validar `motivo.trim().length >= 1 && motivo.trim().length <= 500`; habilitar el botón "Confirmar" solo cuando se cumple
     - Al confirmar con motivo válido: llamar `Api.put('/mockups/:id', {status:'rejected', reason})`, eliminar de la cola, mostrar `Toast.success`
@@ -233,7 +233,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
 
 
 - [ ] 9. Sección Publicaciones
-  - [~] 9.1 Implementar listado y filtro de publicaciones en `admin/js/sections/publicaciones.js`
+  - [ ] 9.1 Implementar listado y filtro de publicaciones en `admin/js/sections/publicaciones.js`
     - En `PublicacionesSection.render()`: llamar `Api.get('/mockups?status=approved')`, renderizar lista con miniaturas frontal/trasera, nombre del producto, estado de publicación y fecha de última acción
     - Implementar filtro `todos | published | unpublished` operando sobre el array local
     - _Requisitos: 7.1, 7.2, 7.6_
@@ -242,7 +242,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
     - **Property 12: Filtro de estado opera correctamente sobre cualquier lista**
     - **Validates: Requirements 7.6**
 
-  - [~] 9.3 Implementar publicar y despublicar mockup
+  - [ ] 9.3 Implementar publicar y despublicar mockup
     - Al pulsar "Publicar": validar `item.status === 'approved'` en el cliente antes de llamar a la API; si no es `approved`, mostrar `Toast.error` y cancelar sin llamar a la API
     - Si es válido: llamar `Api.put('/mockups/:id', {published:true})`, actualizar estado en la vista, mostrar `Toast.success`
     - Al pulsar "Despublicar": llamar `Api.put('/mockups/:id', {published:false})`, actualizar estado en la vista, mostrar `Toast.success`
@@ -257,7 +257,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
 
 
 - [ ] 10. Sección Redes Sociales
-  - [~] 10.1 Implementar listado de contenidos de redes en `admin/js/sections/redes.js`
+  - [ ] 10.1 Implementar listado de contenidos de redes en `admin/js/sections/redes.js`
     - En `RedesSection.render()`: llamar `Api.get('/social-content')`, ordenar por `createdAt` descendente
     - Si la lista está vacía: renderizar mensaje informativo con enlace `<a href="#publicaciones">` a la sección de publicaciones
     - Renderizar cada item con: imagen Instagram (1080×1080), imagen Facebook (1200×630), caption en campo de solo lectura con botón copiar
@@ -267,7 +267,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
     - **Property 7: Listas de secciones siempre ordenadas por fecha**
     - **Validates: Requirements 8.1**
 
-  - [~] 10.3 Implementar descargar imágenes y copiar caption
+  - [ ] 10.3 Implementar descargar imágenes y copiar caption
     - Botón "Descargar Instagram": `window.open(item.instagramUrl, '_blank')`
     - Botón "Descargar Facebook": `window.open(item.facebookUrl, '_blank')`
     - Botón "Copiar caption": `navigator.clipboard.writeText(item.caption)` → `Toast.success`
@@ -280,14 +280,14 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
     - _Requisitos: 8.5, 8.6, 8.7_
 
 
-- [~] 11. Checkpoint — Secciones de contenido
+- [ ] 11. Checkpoint — Secciones de contenido
   - Verificar que las seis secciones se renderizan correctamente con datos mockeados
   - Verificar que los filtros y ordenamientos funcionan en memoria sin re-fetch
   - Verificar que los Toast de éxito desaparecen a los 4 s y los de error persisten
   - Consultar si hay dudas antes de continuar
 
 - [ ] 12. Sidebar y navegación con badges
-  - [~] 12.1 Implementar `admin/js/sidebar.js` — Sidebar navigation
+  - [ ] 12.1 Implementar `admin/js/sidebar.js` — Sidebar navigation
     - Renderizar en el DOM la lista de ítems de navegación con `data-nav-hash` usando `NAV_ITEMS` del diseño (íconos, labels, hash)
     - Implementar `Sidebar.setActive(hash)`: quitar `nav-active` de todos los ítems y aplicarla al ítem cuyo `data-nav-hash === hash`
     - Implementar `Sidebar.updateBadge(hash, count)`: actualizar texto y visibilidad del badge en el ítem correspondiente
@@ -301,7 +301,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
 
 
 - [ ] 13. Modal component
-  - [~] 13.1 Implementar `admin/js/modal.js` — Modal reutilizable
+  - [ ] 13.1 Implementar `admin/js/modal.js` — Modal reutilizable
     - Implementar `Modal.open({title, bodyHTML, onConfirm, confirmLabel, confirmDisabled})`: inyectar contenido en el shell del modal que ya existe en `index.html`, remover clase `hidden`, aplicar `aria-modal="true"`, enfocar el botón "Confirmar"
     - Implementar `Modal.close()`: agregar clase `hidden`, limpiar listeners
     - Asegurar que el modal es accesible: `role="dialog"`, `aria-labelledby="modal-title"`
@@ -314,13 +314,13 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
 
 
 - [ ] 14. Bootstrap e integración final (`app.js`)
-  - [~] 14.1 Implementar `admin/js/app.js` — Bootstrap y wiring
+  - [ ] 14.1 Implementar `admin/js/app.js` — Bootstrap y wiring
     - En `DOMContentLoaded`: llamar `Network.init()`, llamar `Router.navigate(location.hash || '#patrones')`
     - Exponer globalmente los módulos necesarios (`AuthGuard`, `Toast`, `Modal`, `Sidebar`, `Api`) para que las secciones puedan referenciarlos por nombre
     - Verificar que el flujo completo funciona: carga → auth check → render sección → navegación → logout
     - _Requisitos: 1.1, 2.1, 2.2, 9.2_
 
-- [~] 15. Checkpoint — Integración completa
+- [ ] 15. Checkpoint — Integración completa
   - Verificar el flujo principal completo en el navegador: login → patrones → crear patrón → mockup → aprobación → publicación
   - Verificar que el badge de aprobaciones se actualiza al navegar a `#aprobaciones`
   - Verificar que el menú hamburguesa funciona en viewport 768 px
@@ -328,12 +328,12 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
 
 
 - [ ] 16. Deploy a S3 y configuración de CloudFront
-  - [~] 16.1 Crear script de despliegue a S3
+  - [ ] 16.1 Crear script de despliegue a S3
     - Agregar script npm `"deploy:admin"` en `package.json` que ejecute: `npm run build:admin-css && aws s3 sync ./admin s3://cronusfit-exhibition-site-prod/admin/ --delete`
     - Asegurar que las rutas relativas de CSS, JS e imágenes sean compatibles con el prefijo `/admin/` de CloudFront
     - _Requisitos: 9.1, 9.5_
 
-  - [~] 16.2 Configurar regla de comportamiento en CloudFront para `/admin/*`
+  - [ ] 16.2 Configurar regla de comportamiento en CloudFront para `/admin/*`
     - En `infrastructure/template.yaml`, agregar un `CacheBehavior` para el path pattern `/admin/*`
     - Configurar Custom Error Response: errores 403 y 404 bajo `/admin/*` deben retornar `admin/index.html` con código HTTP 200 (habilita el Hash Router)
     - Agregar `ResponseHeadersPolicy` con `Content-Security-Policy` según la definición del diseño
@@ -343,7 +343,7 @@ SPA estática (Vanilla JS ES2022 + TailwindCSS) desplegada en `/admin/` del buck
     - Verificar que el directorio `admin/` contiene `index.html`, `css/admin.css` y todos los archivos JS esperados antes del sync a S3
     - _Requisitos: 9.1, 9.2_
 
-- [~] 17. Checkpoint final — Verificar despliegue
+- [ ] 17. Checkpoint final — Verificar despliegue
   - Verificar que `https://{cloudfront-domain}/admin/` carga el panel y redirige a `#login`
   - Verificar que `/admin/#patrones` carga directamente sin 404
   - Verificar en DevTools que la cabecera `Content-Security-Policy` está presente en la respuesta de CloudFront

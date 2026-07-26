@@ -283,7 +283,7 @@ This plan implements the Cronus Fit serverless catalog automation platform using
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 11. Implement Exhibition Website module
-  - [-] 11.1 Implement static site generator with Eleventy
+  - [ ] 11.1 Implement static site generator with Eleventy
     - Create `src/modules/exhibition/site-builder.ts`
     - Configure Eleventy to generate static HTML from published product data
     - Implement responsive product grid (320px–2560px viewport)
@@ -315,7 +315,7 @@ This plan implements the Cronus Fit serverless catalog automation platform using
     - **Validates: Requirements 6.1, 6.4, 6.5, 6.9, 6.10**
 
 - [x] 12. Implement WhatsApp Bridge module
-  - [-] 12.1 Implement WhatsApp send service (Lambda → n8n → WAHA)
+  - [ ] 12.1 Implement WhatsApp send service (Lambda → n8n → WAHA)
     - Create `src/modules/whatsapp/send-service.ts`
     - Send mockup images with or without interactive buttons based on approval purpose
     - Send quote details with "Aceptar Cotización" / "Rechazar Cotización" buttons
@@ -324,7 +324,7 @@ This plan implements the Cronus Fit serverless catalog automation platform using
     - Load WAHA credentials from Secrets Manager
     - _Requirements: 12.1, 12.2, 12.3, 12.6, 12.10_
 
-  - [-] 12.2 Implement WhatsApp webhook receiver (WAHA → n8n → API Gateway)
+  - [ ] 12.2 Implement WhatsApp webhook receiver (WAHA → n8n → API Gateway)
     - Create `src/modules/whatsapp/webhook-receiver.ts`
     - Authenticate incoming webhooks with shared secret token
     - Process "Aprobar ✓" — update mockup status to approved
@@ -360,18 +360,18 @@ This plan implements the Cronus Fit serverless catalog automation platform using
     - Handle failures: log, notify Admin, allow manual retry, no queue entry on failure
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7_
 
-  - [-] 13.2 Implement Social Content Lambda handlers
+  - [ ] 13.2 Implement Social Content Lambda handlers
     - Create `src/lambdas/social-generate/handler.ts` — triggered by publish event
     - Create `src/lambdas/social-brand/handler.ts` — brand overlay application
     - Store generated content in S3 and DynamoDB with `pending_review` status
     - _Requirements: 10.1–10.7, 13.5_
 
-  - [-] 13.3 Write property test for Social Content Generator (Property 21)
+  - [ ] 13.3 Write property test for Social Content Generator (Property 21)
     - **Property 21: Social Content Format Specification** — verify Instagram 1080×1080 72DPI PNG, Facebook 1200×630 72DPI PNG, Spanish caption ≤2200 chars with 5–15 hashtags, brand overlay
     - **Validates: Requirements 10.1, 10.2, 10.3, 10.6**
 
 - [x] 14. Implement Monitoring module (Free Tier tracking)
-  - [-] 14.1 Implement usage monitoring and alerting
+  - [ ] 14.1 Implement usage monitoring and alerting
     - Create `src/modules/monitoring/usage-tracker.ts`
     - Check S3, Lambda, DynamoDB, API Gateway, CloudFront, SES usage every 6 hours (EventBridge scheduled)
     - Alert Admin at 80% threshold within 10 minutes of detection

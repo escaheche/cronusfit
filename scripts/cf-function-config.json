@@ -1,0 +1,4 @@
+{
+  "Comment": "Rewrite directory URLs to index.html for CronusFit",
+  "Runtime": "cloudfront-js-2.0"
+}
