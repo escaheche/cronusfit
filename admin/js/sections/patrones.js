@@ -370,6 +370,7 @@ const PatronesSection = {
         measurements: { chestWidth, bodyLength, shoulderWidth, sleeveLength },
       });
       Toast.success('Patrón generado correctamente. Aparecerá en la lista pronto.');
+      
       // Close form and reload list
       const fc = document.getElementById('patron-form-container');
       if (fc) { fc.innerHTML = ''; fc.classList.add('hidden'); }

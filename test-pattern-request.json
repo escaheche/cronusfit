@@ -1,0 +1,16 @@
+{
+  "garmentType": "camiseta",
+  "ageGroup": "adult",
+  "baseSize": "M",
+  "measurements": {
+    "chest": 920,
+    "totalLength": 700,
+    "sleeveLength": 200,
+    "shoulderWidth": 450,
+    "neckWidth": 180
+  },
+  "customizations": {
+    "necklineStyle": "crew",
+    "sleeveStyle": "short"
+  }
+}

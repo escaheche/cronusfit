@@ -1,0 +1,7 @@
+CognitoUserPoolArn=arn:aws:cognito-idp:us-east-1:682579209127:userpool/us-east-1_GOBIYDfqK
+DynamoDBTableName=CronusFit
+ExhibitionBucketName=cronusfit-exhibition-site-prod
+CloudFrontDistributionId=EKSSI9LYAOBGP
+AdminEmail=cronusfit.me@gmail.com
+SenderEmail=cronusfit.me@gmail.com
+Environment=prod

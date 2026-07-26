@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CronusFit Pattern Lambdas - Simplified deployment
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+  ApiId:
+    Type: String
+    Default: dp5pdbigb1
+    Description: Existing API Gateway REST API ID
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 30
+    MemorySize: 256
+    Environment:
+      Variables:
+        TABLE_NAME: CronusFit
+        ENVIRONMENT: !Ref Environment
+
+Resources:
+  # Pattern List Function
+  PatternListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-pattern-list-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/pattern-list/
+      Description: Lists all patterns (JWT-protected)
+      Events:
+        GetPatterns:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiId
+            Path: /api/patterns
+            Method: GET
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: CronusFit
+
+  # Pattern Generate Function
+  PatternGenerateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-pattern-generate-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/pattern-generate/
+      Description: Generates SVG cutting patterns (JWT-protected)
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          TEMPLATES_PATH: /var/task/templates/parametric
+          S3_ASSETS_BUCKET: cronusfit-exhibition-site-prod
+      Events:
+        PostPatternGenerate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiId
+            Path: /api/patterns/generate
+            Method: POST
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: CronusFit
+        - S3CrudPolicy:
+            BucketName: cronusfit-exhibition-site-prod
+
+Outputs:
+  PatternListFunctionArn:
+    Description: Pattern List Lambda Function ARN
+    Value: !GetAtt PatternListFunction.Arn
+  PatternGenerateFunctionArn:
+    Description: Pattern Generate Lambda Function ARN
+    Value: !GetAtt PatternGenerateFunction.Arn
