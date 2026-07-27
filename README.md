@@ -12,7 +12,7 @@ Plataforma automatizada de catálogo y gestión para **CronusFit**, marca de rop
 | Panel Admin | https://d29tumvobv6mdj.cloudfront.net/admin/ |
 | API Gateway | https://dp5pdbigb1.execute-api.us-east-1.amazonaws.com/prod |
 
-**Credenciales Admin:** `cronusfit-admin` / `CronusFit2024!`
+**Credenciales Admin:** `cronusfit-admin` / `CronusFit2025!`
 
 ---
 
@@ -290,4 +290,4 @@ Los patrones SVG se exportan directamente en el navegador del Admin usando **jsP
 
 ---
 
-*CronusFit © 2024 — San Pedro de la Paz, Biobío, Chile*
+*CronusFit © 2026 — San Pedro de la Paz, Biobío, Chile*
