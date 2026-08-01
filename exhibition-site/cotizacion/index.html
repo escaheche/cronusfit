@@ -111,70 +111,107 @@ layout: false
     <p>© 2026 CronusFit. Todos los derechos reservados.</p>
   </footer>
 
-  <script>
-    document.getElementById('quoteForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const submitBtn = document.getElementById('submitBtn');
-      const successMsg = document.getElementById('successMessage');
-      const errorMsg = document.getElementById('errorMessage');
-      const errorText = document.getElementById('errorText');
-      
-      successMsg.classList.add('hidden');
-      errorMsg.classList.add('hidden');
-      
-      // Obtener token de hCaptcha
-      const captchaToken = hcaptcha.getResponse();
-      if (!captchaToken) {
-        errorText.textContent = 'Por favor, completa el CAPTCHA';
-        errorMsg.classList.remove('hidden');
-        return;
-      }
-
-      // Obtener tallas seleccionadas
-      const sizesSelect = document.getElementById('sizes');
-      const selectedSizes = Array.from(sizesSelect.selectedOptions).map(opt => opt.value);
-
-      const payload = {
-        clientName: document.getElementById('clientName').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
-        productId: document.getElementById('productId').value.trim(),
-        quantity: parseInt(document.getElementById('quantity').value, 10),
-        ageGroup: document.getElementById('ageGroup').value,
-        sizes: selectedSizes,
-        customizationNotes: document.getElementById('customizationNotes').value.trim(),
-        captchaToken: captchaToken
-      };
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Enviando...';
-
-      try {
-        const response = await fetch('https://dp5pdbigb1.execute-api.us-east-1.amazonaws.com/prod/quotes', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          document.getElementById('trackingNumber').textContent = data.trackingNumber;
-          successMsg.classList.remove('hidden');
-          document.getElementById('quoteForm').reset();
-          hcaptcha.reset();
-        } else {
-          throw new Error(data.message || 'Error al enviar');
+ <script>
+  // Esperar a que hCaptcha esté cargado
+  function waitForHCaptcha(callback, maxAttempts = 50) {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      if (typeof hcaptcha !== 'undefined' && hcaptcha.getResponse) {
+        clearInterval(interval);
+        callback();
+      } else if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        console.error('hCaptcha no se cargó después de 5 segundos');
+        const errorMsg = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        if (errorMsg && errorText) {
+          errorText.textContent = 'Error al cargar el CAPTCHA. Recarga la página e intenta de nuevo.';
+          errorMsg.classList.remove('hidden');
         }
-      } catch (error) {
-        errorText.textContent = error.message;
-        errorMsg.classList.remove('hidden');
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Enviar Solicitud';
       }
-    });
-  </script>
+    }, 100);
+  }
+
+  document.getElementById('quoteForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const successMsg = document.getElementById('successMessage');
+    const errorMsg = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+    
+    successMsg.classList.add('hidden');
+    errorMsg.classList.add('hidden');
+    
+    // Verificar que hCaptcha está cargado
+    if (typeof hcaptcha === 'undefined') {
+      errorText.textContent = 'El CAPTCHA aún no está listo. Espera un momento e intenta de nuevo.';
+      errorMsg.classList.remove('hidden');
+      return;
+    }
+
+    // Obtener token de hCaptcha
+    let captchaToken;
+    try {
+      captchaToken = hcaptcha.getResponse();
+    } catch (error) {
+      console.error('Error al obtener token de hCaptcha:', error);
+      errorText.textContent = 'Error con el CAPTCHA. Recarga la página.';
+      errorMsg.classList.remove('hidden');
+      return;
+    }
+
+    if (!captchaToken) {
+      errorText.textContent = 'Por favor, completa el CAPTCHA';
+      errorMsg.classList.remove('hidden');
+      return;
+    }
+
+    // Obtener tallas seleccionadas
+    const sizesSelect = document.getElementById('sizes');
+    const selectedSizes = Array.from(sizesSelect.selectedOptions).map(opt => opt.value);
+
+    const payload = {
+      clientName: document.getElementById('clientName').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      productId: document.getElementById('productId').value.trim(),
+      quantity: parseInt(document.getElementById('quantity').value, 10),
+      ageGroup: document.getElementById('ageGroup').value,
+      sizes: selectedSizes,
+      customizationNotes: document.getElementById('customizationNotes').value.trim(),
+      captchaToken: captchaToken
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enviando...';
+
+    try {
+      const response = await fetch('https://dp5pdbigb1.execute-api.us-east-1.amazonaws.com/prod/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        document.getElementById('trackingNumber').textContent = data.trackingNumber;
+        successMsg.classList.remove('hidden');
+        document.getElementById('quoteForm').reset();
+        hcaptcha.reset();
+      } else {
+        throw new Error(data.message || 'Error al enviar');
+      }
+    } catch (error) {
+      errorText.textContent = error.message;
+      errorMsg.classList.remove('hidden');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enviar Solicitud';
+    }
+  });
+</script>
 </body>
 </html>
