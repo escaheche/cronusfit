@@ -7,378 +7,311 @@ layout: false
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solicitar Cotización - CronusFit</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="icon" href="/favicon.ico">
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-  </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="bg-white text-brand-blue min-h-screen flex flex-col">
+
   <!-- Header -->
-  <header class="bg-blue-900 text-white shadow-lg">
-    <div class="container mx-auto px-4 py-4">
-      <div class="flex flex-col md:flex-row justify-between items-center">
-        <div class="flex items-center mb-4 md:mb-0">
-          <h1 class="text-2xl font-bold">CronusFit</h1>
-        </div>
-        <nav class="flex space-x-6 text-sm">
-          <a href="/" class="hover:text-blue-200 transition">Inicio</a>
-          <a href="/products/" class="hover:text-blue-200 transition">Productos</a>
-          <a href="/cotizacion/" class="font-semibold underline">Cotización</a>
-          <a href="/estado/" class="hover:text-blue-200 transition">Estado</a>
+  <header class="bg-brand-blue shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo + Brand -->
+        <a href="/" class="flex items-center gap-3" aria-label="CronusFit Home">
+          <img src="/assets/images/logo-cronusfit.png" alt="CronusFit" class="h-10 w-auto">
+          <span class="text-white font-bold text-xl hidden sm:inline">CronusFit</span>
+        </a>
+
+        <!-- Navigation -->
+        <nav class="flex items-center gap-4 sm:gap-6" aria-label="Main navigation">
+          <a href="/" class="text-white hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.home">Inicio</a>
+          <a href="/products/" class="text-white hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.products">Productos</a>
+          <a href="/cotizacion/" class="text-white hover:text-brand-gold transition-colors text-sm sm:text-base font-medium" data-i18n="nav.quote">Solicitar Cotización</a>
+          <a href="/estado/" class="text-white hover:text-brand-gold transition-colors text-sm sm:text-base font-medium hidden md:inline" data-i18n="nav.status">Estado de Cotización</a>
+          <button id="lang-switcher" class="text-brand-gold hover:text-brand-gold-light transition-colors text-sm font-medium border border-brand-gold rounded px-2 py-1" data-i18n="nav.language" aria-label="Switch language">English</button>
         </nav>
       </div>
     </div>
   </header>
 
   <!-- Main Content -->
-  <main class="flex-grow container mx-auto px-4 py-8 max-w-3xl">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Solicitar Cotización</h1>
-    
-    <!-- Success Message -->
-    <div id="successMessage" class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
-      <p class="font-bold">¡Solicitud enviada con éxito!</p>
-      <p class="mt-2">Tu número de seguimiento es: <span id="trackingNumber" class="font-mono font-bold text-lg"></span></p>
-      <p class="text-sm mt-2">Te hemos enviado un correo de confirmación. Puedes consultar el estado en la página de Estado.</p>
-      <a href="/estado/" class="inline-block mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Consultar Estado</a>
-    </div>
+  <main class="flex-1 py-12 sm:py-16">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <!-- Error Message -->
-    <div id="errorMessage" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
-      <p class="font-bold">Error</p>
-      <p id="errorText" class="text-sm mt-1"></p>
-    </div>
+      <!-- Page Title -->
+      <h1 class="text-2xl sm:text-3xl font-bold text-brand-blue mb-8 text-center" data-i18n="quote.title">Solicitar Cotización</h1>
 
-    <!-- Quote Form -->
-    <form id="quoteForm" class="bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4 space-y-6">
-      
-      <!-- Nombre -->
-      <div>
-        <label class="block text-gray-700 text-sm font-semibold mb-2" for="clientName">
-          Nombre completo <span class="text-red-500">*</span>
-        </label>
-        <input 
-          class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-          id="clientName" 
-          name="clientName" 
-          type="text" 
-          placeholder="Tu nombre completo"
-          required
-        >
+      <!-- Success Message (hidden by default) -->
+      <div id="quote-success" class="hidden bg-green-50 border border-green-200 rounded-lg p-6 text-center mb-8" role="alert" aria-live="polite">
+        <svg class="w-12 h-12 text-green-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p id="quote-success-message" class="text-green-700 font-medium text-lg"></p>
       </div>
 
-      <!-- Email y Teléfono -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Error Banner (hidden by default) -->
+      <div id="quote-error-banner" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6" role="alert" aria-live="polite">
+        <p id="quote-error-banner-message" class="text-red-700 text-sm font-medium"></p>
+      </div>
+
+      <!-- hCaptcha Unavailable Message (hidden by default) -->
+      <div id="captcha-unavailable" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6" role="alert" aria-live="polite">
+        <p class="text-yellow-700 text-sm font-medium" data-i18n="error.captcha_unavailable">El formulario no está disponible temporalmente. Intenta de nuevo en unos momentos.</p>
+      </div>
+
+      <!-- Quote Form -->
+      <form id="quote-form" class="space-y-6" novalidate>
+
+        <!-- Name Field -->
         <div>
-          <label class="block text-gray-700 text-sm font-semibold mb-2" for="email">
-            Correo electrónico <span class="text-red-500">*</span>
-          </label>
-          <input 
-            class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-            id="email" 
-            name="email" 
-            type="email" 
-            placeholder="tu@email.com"
+          <label for="quote-name" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.name">Nombre completo</label>
+          <input
+            type="text"
+            id="quote-name"
+            name="clientName"
             required
+            minlength="1"
+            maxlength="100"
+            autocomplete="name"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors"
+            data-i18n-placeholder="quote.name"
+            placeholder="Nombre completo"
+            aria-required="true"
           >
+          <p id="error-name" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
         </div>
+
+        <!-- Email Field -->
         <div>
-          <label class="block text-gray-700 text-sm font-semibold mb-2" for="phone">
-            Teléfono (WhatsApp) <span class="text-red-500">*</span>
-          </label>
-          <input 
-            class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-            id="phone" 
-            name="phone" 
-            type="tel" 
-            placeholder="+56 9 1234 5678"
+          <label for="quote-email" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.email">Correo electrónico</label>
+          <input
+            type="email"
+            id="quote-email"
+            name="email"
             required
+            autocomplete="email"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors"
+            data-i18n-placeholder="quote.email"
+            placeholder="Correo electrónico"
+            aria-required="true"
           >
+          <p id="error-email" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
         </div>
-      </div>
 
-      <!-- Producto -->
-      <div>
-        <label class="block text-gray-700 text-sm font-semibold mb-2" for="productId">
-          Producto de interés <span class="text-red-500">*</span>
-        </label>
-        <input 
-          class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-          id="productId" 
-          name="productId" 
-          type="text" 
-          placeholder="Ej: Camiseta deportiva sublimada"
-          required
-        >
-      </div>
-
-      <!-- Cantidad y Grupo Etario -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Phone Field -->
         <div>
-          <label class="block text-gray-700 text-sm font-semibold mb-2" for="quantity">
-            Cantidad <span class="text-red-500">*</span>
-          </label>
-          <input 
-            class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-            id="quantity" 
-            name="quantity" 
-            type="number" 
-            min="1" 
+          <label for="quote-phone" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.phone">Teléfono (WhatsApp)</label>
+          <input
+            type="tel"
+            id="quote-phone"
+            name="phone"
+            required
+            autocomplete="tel"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors"
+            data-i18n-placeholder="quote.phone"
+            placeholder="Teléfono (WhatsApp)"
+            aria-required="true"
+            aria-describedby="phone-hint"
+          >
+          <p id="phone-hint" class="text-gray-500 text-xs mt-1">+56 9 1234 5678</p>
+          <p id="error-phone" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Product Field (hidden/readonly, pre-filled from URL param) -->
+        <div id="product-field-container">
+          <label for="quote-product" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.product">Producto</label>
+          <input
+            type="text"
+            id="quote-product"
+            name="productId"
+            required
+            readonly
+            class="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+            aria-required="true"
+          >
+          <p id="error-product" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Quantity Field -->
+        <div>
+          <label for="quote-quantity" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.quantity">Cantidad</label>
+          <input
+            type="number"
+            id="quote-quantity"
+            name="quantity"
+            required
+            min="1"
             max="10000"
-            placeholder="10"
-            required
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors"
+            placeholder="1"
+            aria-required="true"
           >
+          <p id="error-quantity" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
         </div>
+
+        <!-- Age Group Field -->
         <div>
-          <label class="block text-gray-700 text-sm font-semibold mb-2" for="ageGroup">
-            Grupo etario <span class="text-red-500">*</span>
-          </label>
-          <select 
-            class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-            id="ageGroup" 
-            name="ageGroup" 
+          <label for="quote-age-group" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.age_group">Grupo etario</label>
+          <select
+            id="quote-age-group"
+            name="ageGroup"
             required
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors bg-white"
+            aria-required="true"
           >
-            <option value="">Selecciona un grupo</option>
-            <option value="adult">Adulto</option>
-            <option value="children">Infantil</option>
+            <option value="" data-i18n="quote.age_group.placeholder">Selecciona un grupo etario</option>
+            <option value="children" data-i18n="quote.age_group.children">Infantil</option>
+            <option value="adult" data-i18n="quote.age_group.adult">Adulto</option>
           </select>
+          <p id="error-age-group" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
         </div>
-      </div>
 
-      <!-- Tallas -->
-      <div>
-        <label class="block text-gray-700 text-sm font-semibold mb-2">
-          Tallas deseadas <span class="text-red-500">*</span>
-          <span class="text-xs text-gray-500 font-normal ml-2">(Ctrl+click para seleccionar múltiples)</span>
-        </label>
-        <select 
-          class="shadow-sm border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-          id="sizes" 
-          name="sizes" 
-          multiple 
-          size="5"
-          required
-        >
-          <option value="XS">XS</option>
-          <option value="S">S</option>
-          <option value="M">M</option>
-          <option value="L">L</option>
-          <option value="XL">XL</option>
-          <option value="XXL">XXL</option>
-          <option value="3XL">3XL</option>
-          <option value="4XL">4XL</option>
-          <option value="2T">2T (Infantil)</option>
-          <option value="4T">4T (Infantil)</option>
-          <option value="6">6 (Infantil)</option>
-          <option value="8">8 (Infantil)</option>
-          <option value="10">10 (Infantil)</option>
-          <option value="12">12 (Infantil)</option>
-          <option value="14">14 (Infantil)</option>
-          <option value="16">16 (Infantil)</option>
-        </select>
-        <p class="text-xs text-gray-500 mt-1">Mantén presionada la tecla Ctrl (o Cmd en Mac) para seleccionar múltiples tallas.</p>
-      </div>
+        <!-- Sizes Field (checkboxes, shown based on age group) -->
+        <div id="sizes-container" class="hidden">
+          <fieldset>
+            <legend class="block text-sm font-medium text-gray-700 mb-2" data-i18n="quote.sizes">Tallas deseadas</legend>
+            <!-- Children sizes -->
+            <div id="sizes-children" class="hidden flex flex-wrap gap-3">
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="2T" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">2T</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="4" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">4</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="6" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">6</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="8" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">8</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="10" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">10</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="12" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">12</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="14" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">14</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="16" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">16</span>
+              </label>
+            </div>
+            <!-- Adult sizes -->
+            <div id="sizes-adult" class="hidden flex flex-wrap gap-3">
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="XS" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">XS</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="S" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">S</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="M" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">M</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="L" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">L</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="XL" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">XL</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="2XL" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">2XL</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="3XL" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">3XL</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="4XL" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">4XL</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="5XL" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">5XL</span>
+              </label>
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="sizes" value="6XL" class="w-4 h-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue">
+                <span class="text-sm">6XL</span>
+              </label>
+            </div>
+          </fieldset>
+          <p id="error-sizes" class="text-red-600 text-xs mt-1 hidden" role="alert" aria-live="polite"></p>
+        </div>
 
-      <!-- Notas -->
-      <div>
-        <label class="block text-gray-700 text-sm font-semibold mb-2" for="customizationNotes">
-          Notas de personalización <span class="text-xs text-gray-500 font-normal">(opcional)</span>
-        </label>
-        <textarea 
-          class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-          id="customizationNotes" 
-          name="customizationNotes" 
-          rows="3" 
-          maxlength="1000"
-          placeholder="Describe tus requisitos de diseño, colores, logos, etc."
-        ></textarea>
-        <p class="text-xs text-gray-500 text-right mt-1"><span id="charCount">0</span>/1000</p>
-      </div>
+        <!-- Notes Field -->
+        <div>
+          <label for="quote-notes" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="quote.notes">Notas de personalización (opcional)</label>
+          <textarea
+            id="quote-notes"
+            name="customizationNotes"
+            maxlength="1000"
+            rows="4"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-colors resize-y"
+            data-i18n-placeholder="quote.notes"
+            placeholder="Notas de personalización (opcional)"
+          ></textarea>
+          <p class="text-gray-500 text-xs mt-1"><span id="notes-char-count">0</span>/1000</p>
+        </div>
 
-      <!-- hCaptcha -->
-      <div class="my-6">
-        <label class="block text-gray-700 text-sm font-semibold mb-3">
-          Verificación de seguridad <span class="text-red-500">*</span>
-        </label>
-        <div class="h-captcha" data-sitekey="3e2ae7d0-297c-4b58-8160-7546c482c552"></div>
-        <p class="text-xs text-gray-500 mt-2">Protegido por hCaptcha — <a href="https://www.hcaptcha.com/privacy" class="text-blue-600 hover:underline" target="_blank">Privacidad</a></p>
-      </div>
+        <!-- hCaptcha Widget -->
+        <div class="relative">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Verificación de seguridad</label>
+          <div id="hcaptcha-container" class="rounded-lg overflow-visible border border-gray-200 bg-gray-50 p-4 min-h-[120px]">
+            <div id="hcaptcha-widget" class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001" data-callback="onCaptchaSuccess" data-expired-callback="onCaptchaExpired" data-error-callback="onCaptchaError"></div>
+          </div>
+          <p id="error-captcha" class="text-red-600 text-xs mt-2 hidden" role="alert" aria-live="polite" data-i18n="quote.error.captcha">Por favor completa la verificación CAPTCHA</p>
+          <p class="text-gray-400 text-xs mt-1">Protegido por hCaptcha — <a href="https://www.hcaptcha.com/privacy" class="underline hover:text-brand-blue" target="_blank" rel="noopener">Privacidad</a></p>
+        </div>
 
-      <!-- Submit Button -->
-      <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-        <button 
-          id="submitBtn" 
-          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline w-full transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md" 
-          type="submit"
-        >
-          Enviar Solicitud
-        </button>
-      </div>
-    </form>
+        <!-- Submit Button -->
+        <div>
+          <button
+            type="submit"
+            id="quote-submit-btn"
+            class="w-full bg-brand-gold hover:bg-brand-gold-light text-brand-blue font-bold text-lg px-8 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            data-i18n="quote.submit"
+          >
+            Enviar Solicitud
+          </button>
+        </div>
+
+      </form>
+    </div>
   </main>
 
   <!-- Footer -->
-  <footer class="bg-gray-800 text-white text-center py-6 mt-auto">
-    <div class="container mx-auto px-4">
-      <p class="text-sm">© 2026 CronusFit. Todos los derechos reservados.</p>
-      <p class="text-xs text-gray-400 mt-1">San Pedro de la Paz, Región del Biobío, Chile</p>
+  <footer class="bg-brand-blue-dark text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <img src="/assets/images/logo-cronusfit.png" alt="CronusFit" class="h-8 w-auto">
+          <span class="font-bold">CronusFit</span>
+        </div>
+        <p class="text-sm text-gray-300">&copy; 2026 CronusFit. All rights reserved.</p>
+      </div>
     </div>
   </footer>
 
-  <!-- JavaScript -->
-  <script>
-    // Contador de caracteres para notas
-    const notesArea = document.getElementById('customizationNotes');
-    const charCount = document.getElementById('charCount');
-    if (notesArea && charCount) {
-      notesArea.addEventListener('input', () => {
-        charCount.textContent = notesArea.value.length;
-      });
-    }
+  <!-- i18n Scripts -->
+  <script src="/assets/js/i18n.js"></script>
+  <script src="/assets/js/lang-switcher.js"></script>
 
-    // Esperar a que hCaptcha esté completamente cargado
-    function waitForHCaptcha(callback, maxAttempts = 50) {
-      let attempts = 0;
-      const interval = setInterval(() => {
-        attempts++;
-        if (typeof window.hcaptcha !== 'undefined' && typeof window.hcaptcha.getResponse === 'function') {
-          clearInterval(interval);
-          callback();
-        } else if (attempts >= maxAttempts) {
-          clearInterval(interval);
-          console.error('hCaptcha no se cargó después de 5 segundos');
-          showError('Error al cargar el CAPTCHA. Recarga la página e intenta de nuevo.');
-        }
-      }, 100);
-    }
-
-    // Mostrar mensaje de error
-    function showError(message) {
-      const errorMsg = document.getElementById('errorMessage');
-      const errorText = document.getElementById('errorText');
-      if (errorMsg && errorText) {
-        errorText.textContent = message;
-        errorMsg.classList.remove('hidden');
-        setTimeout(() => {
-          errorMsg.classList.add('hidden');
-        }, 8000);
-      }
-    }
-
-    // Mostrar mensaje de éxito
-    function showSuccess(trackingNumber) {
-      const successMsg = document.getElementById('successMessage');
-      const trackingSpan = document.getElementById('trackingNumber');
-      if (successMsg && trackingSpan) {
-        trackingSpan.textContent = trackingNumber;
-        successMsg.classList.remove('hidden');
-        successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
-
-    // Manejo del envío del formulario
-    document.getElementById('quoteForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const submitBtn = document.getElementById('submitBtn');
-      const form = document.getElementById('quoteForm');
-      
-      // Ocultar mensajes previos
-      document.getElementById('errorMessage').classList.add('hidden');
-      document.getElementById('successMessage').classList.add('hidden');
-      
-      // Verificar que hCaptcha está cargado
-      if (typeof window.hcaptcha === 'undefined') {
-        showError('El CAPTCHA aún no está listo. Espera un momento e intenta de nuevo.');
-        return;
-      }
-
-      // Obtener token de hCaptcha
-      let captchaToken;
-      try {
-        captchaToken = window.hcaptcha.getResponse();
-      } catch (error) {
-        console.error('Error al obtener token de hCaptcha:', error);
-        showError('Error con el CAPTCHA. Recarga la página.');
-        return;
-      }
-
-      if (!captchaToken) {
-        showError('Por favor, completa el CAPTCHA');
-        return;
-      }
-
-      // Obtener tallas seleccionadas
-      const sizesSelect = document.getElementById('sizes');
-      const selectedSizes = Array.from(sizesSelect.selectedOptions).map(opt => opt.value);
-
-      if (selectedSizes.length === 0) {
-        showError('Por favor, selecciona al menos una talla');
-        return;
-      }
-
-      // Construir payload
-      const payload = {
-        clientName: document.getElementById('clientName').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
-        productId: document.getElementById('productId').value.trim(),
-        quantity: parseInt(document.getElementById('quantity').value, 10),
-        ageGroup: document.getElementById('ageGroup').value,
-        sizes: selectedSizes,
-        customizationNotes: notesArea.value.trim(),
-        captchaToken: captchaToken
-      };
-
-      // Deshabilitar botón y mostrar estado de carga
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Enviando...';
-      submitBtn.classList.add('opacity-50');
-
-      try {
-        const response = await fetch('https://dp5pdbigb1.execute-api.us-east-1.amazonaws.com/prod/quotes', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          showSuccess(data.trackingNumber);
-          form.reset();
-          if (window.hcaptcha && typeof window.hcaptcha.reset === 'function') {
-            window.hcaptcha.reset();
-          }
-          if (charCount) {
-            charCount.textContent = '0';
-          }
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-          throw new Error(data.message || data.errors || 'Error al enviar la cotización');
-        }
-      } catch (error) {
-        console.error('Error al enviar cotización:', error);
-        showError(error.message || 'Error al enviar la cotización. Inténtalo de nuevo.');
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Enviar Solicitud';
-        submitBtn.classList.remove('opacity-50');
-      }
-    });
-
-    // Verificar que hCaptcha esté listo cuando la página cargue
-    window.addEventListener('load', () => {
-      waitForHCaptcha(() => {
-        console.log('hCaptcha cargado correctamente');
-      });
-    });
-  </script>
+  <!-- Quote Form Logic -->
+  <script src="/assets/js/quote-form.js"></script>
 </body>
 </html>
