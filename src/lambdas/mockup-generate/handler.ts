@@ -234,7 +234,7 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
 
     return {
       statusCode: 201,
-      headers: { 'Content-Type': 'application/json' },
+      headers: CORS_HEADERS,
       body: JSON.stringify(response),
     };
   } catch (error: unknown) {
@@ -255,6 +255,13 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
 /**
  * Build a standardized error response.
  */
+const CORS_HEADERS = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+};
+
 function errorResponse(
   statusCode: number,
   error: string,
@@ -265,7 +272,7 @@ function errorResponse(
 
   return {
     statusCode,
-    headers: { 'Content-Type': 'application/json' },
+    headers: CORS_HEADERS,
     body: JSON.stringify(body),
   };
 }

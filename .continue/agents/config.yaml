@@ -1,0 +1,25 @@
+name: Main Config
+version: 1.0.0
+schema: v1
+
+models:
+  - name: Qwen 2.5 14B - Local
+    provider: ollama
+    model: qwen2.5:14b
+    apiBase: http://localhost:11434
+
+tabAutocompleteModel:
+  name: Qwen 2.5 14B - Local
+  provider: ollama
+  model: qwen2.5:14b
+  apiBase: http://localhost:11434
+
+embeddingsProvider:
+  provider: ollama
+  model: nomic-embed-text
+  apiBase: http://localhost:11434
+
+context:
+  - provider: codebase
+    options:
+      useRipgrep: true

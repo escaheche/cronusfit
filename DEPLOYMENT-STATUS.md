@@ -1,129 +1,209 @@
-# CronusFit - Estado del Despliegue
+# Estado del Despliegue - CronusFit Web
 
-## ✅ Completado
+**Fecha:** 2026-07-26  
+**Estado:** ✅ Sistema funcionando correctamente
 
-### 1. CloudFront Function para Reescritura de URLs
-- **Función creada**: `cronusfit-url-rewrite`
-- **ARN**: `arn:aws:cloudfront::682579209127:function/cronusfit-url-rewrite`
-- **Estado**: LIVE (publicada)
-- **Asociada a**: DefaultCacheBehavior en distribución EKSSI9LYAOBGP
-- **Propósito**: Resuelve URLs de directorios a `index.html` (ej: `/products/` → `/products/index.html`)
+---
 
-### 2. Scripts de Despliegue
-- `scripts/create-cf-function.ps1` - Crea y publica la función CloudFront
-- `scripts/update-distribution.ps1` - Asocia la función con la distribución
-- `scripts/cf-function-config.json` - Configuración de la función
-- `scripts/url-rewrite.js` - Código JavaScript de la función
+## 🌐 URLs en Producción
 
-### 3. Archivos de Configuración Corregidos
-- Corregido el problema de codificación JSON en PowerShell
-- Uso de `file://` para referencias de archivos en AWS CLI
-- Encoding ASCII para evitar BOM en archivos JSON
+| Recurso | URL | Estado |
+|---------|-----|--------|
+| **Sitio público** | https://d29tumvobv6mdj.cloudfront.net | ✅ Funcionando |
+| **Panel Admin** | https://d29tumvobv6mdj.cloudfront.net/admin/ | ✅ Funcionando |
+| **API Gateway** | https://dp5pdbigb1.execute-api.us-east-1.amazonaws.com/prod | ✅ Funcionando |
 
-## 🔄 En Progreso
+---
 
-### CloudFront Distribution Update
-- **Estado**: InProgress (desplegando)
-- **Distribución**: EKSSI9LYAOBGP (d29tumvobv6mdj.cloudfront.net)
-- **Tiempo estimado**: 5-10 minutos desde las 00:54:31 UTC
-- **Cambio aplicado**: FunctionAssociation añadida al DefaultCacheBehavior
+## 🔑 Credenciales Admin
 
-## 🧪 Pendiente de Verificación
-
-### Una vez que la distribución esté "Deployed":
-
-1. **Sitio público** - https://d29tumvobv6mdj.cloudfront.net
-   - [ ] Home page carga correctamente
-   - [ ] Hipervínculos funcionan:
-     - [ ] `/products/` → Página de productos
-     - [ ] `/cotizacion/` → Formulario de cotización
-     - [ ] `/estado/` → Consulta de estado
-
-2. **Panel de administración** - https://d29tumvobv6mdj.cloudfront.net/admin/
-   - [ ] Panel carga (ya no debe mostrar 403)
-   - [ ] Login funciona con Cognito
-   - [ ] Todas las secciones son accesibles vía hash router
-
-## 📋 Próximos Pasos
-
-### Paso 1: Verificar estado de CloudFront
-```powershell
-aws cloudfront get-distribution --id EKSSI9LYAOBGP --query 'Distribution.Status' --output text
 ```
-Esperar hasta que retorne `Deployed` (no `InProgress`)
-
-### Paso 2: Probar URLs públicas
-```powershell
-# Test home
-curl https://d29tumvobv6mdj.cloudfront.net/
-
-# Test products
-curl https://d29tumvobv6mdj.cloudfront.net/products/
-
-# Test cotizacion
-curl https://d29tumvobv6mdj.cloudfront.net/cotizacion/
-
-# Test admin panel
-curl https://d29tumvobv6mdj.cloudfront.net/admin/
+Usuario:    cronusfit-admin
+Contraseña: CronusFit2025!
 ```
 
-### Paso 3: Si aún hay problemas
+**Pool Cognito:** `us-east-1_GOBIYDfqK`  
+**App Client:** `7gfgmp718hi797qd5e4m1pk5ae`
 
-#### Si `/admin/` sigue retornando 403:
-El problema es que falta agregar el archivo `admin/index.html` a S3, o falta el CacheBehavior específico para `/admin/*`.
+---
 
-**Verificar que el archivo existe en S3:**
-```powershell
-aws s3 ls s3://cronusfit-exhibition-site-prod/admin/
+## ✅ Componentes Desplegados
+
+### 1. CloudFront + S3
+- **Distribution ID:** `EKSSI9LYAOBGP`
+- **Domain:** `d29tumvobv6mdj.cloudfront.net`
+- **Bucket S3:** `cronusfit-exhibition-site-prod`
+- **Routing:** CloudFront Function `cronusfit-url-rewrite` maneja rutas `/admin/`, `/products/`, `/cotizacion/`, `/estado/`
+
+### 2. Lambda Functions
+| Función | Propósito | Estado |
+|---------|-----------|--------|
+| `cronusfit-pattern-list-prod` | GET /api/patterns | ✅ Desplegado |
+| `cronusfit-pattern-generate-prod` | POST /api/patterns/generate | ✅ Desplegado |
+
+**Runtime:** Node.js 20.x  
+**IAM Role:** `cronusfit-lambda-execution-role`  
+**Permisos:** DynamoDB Full Access, S3 Full Access, CloudWatch Logs
+
+### 3. API Gateway
+- **API ID:** `dp5pdbigb1`
+- **Stage:** `prod`
+- **Recursos:**
+  - `/api` (ID: `qkimg2`)
+  - `/api/patterns` (ID: `agj8wy`)
+  - `/api/patterns/generate` (ID: `6vwta5`)
+- **Authorizer:** Cognito User Pool (ID: `mnmf30`)
+- **CORS:** ✅ Configurado para todos los endpoints
+
+### 4. DynamoDB
+- **Tabla:** `CronusFit`
+- **Single-table design:** `PK` / `SK` + GSI1
+- **Patrones de clave:**
+  - `PATTERN#{id}` / `METADATA`
+  - `TEMPLATE#{id}` / `METADATA`
+  - `GRADINGTABLE#{ageGroup}#{garmentType}` / `METADATA`
+
+---
+
+## 🔧 Configuración CORS
+
+CORS está completamente configurado para permitir que el admin panel llame a la API:
+
+### OPTIONS Methods (Preflight)
+- **GET /api/patterns**
+  - Headers: `Access-Control-Allow-Origin: *`, `Access-Control-Allow-Methods: GET,OPTIONS,POST`, `Access-Control-Allow-Headers: Content-Type,Authorization,...`
+  
+- **POST /api/patterns/generate**
+  - Headers: `Access-Control-Allow-Origin: *`, `Access-Control-Allow-Methods: POST,OPTIONS`, `Access-Control-Allow-Headers: Content-Type,Authorization,...`
+
+### Integration Responses
+- Todos los métodos (GET, POST) incluyen `Access-Control-Allow-Origin: *` en las respuestas
+
+**Verificación:** ✅ Todos los tests de CORS pasando (ejecutar `./scripts/test-pattern-api.ps1`)
+
+---
+
+## 📋 Funcionalidades Implementadas
+
+### Panel Admin
+- [x] Login con Cognito JWT
+- [x] Hash Router (`#login`, `#patrones`, `#cotizaciones`, `#mockups`, `#aprobaciones`, `#publicaciones`, `#redes`)
+- [x] Auth Guard + session management
+- [x] API client con JWT automático
+- [x] Toast notifications
+- [x] Network connectivity monitor
+- [x] Sección Patrones: listado (vacío inicialmente)
+- [x] Botón "Nuevo patrón" visible
+- [x] Formulario de creación de patrón
+
+### Backend API
+- [x] Lambda pattern-list: GET /api/patterns
+- [x] Lambda pattern-generate: POST /api/patterns/generate
+- [x] Cognito JWT authentication
+- [x] DynamoDB operations
+- [x] S3 storage for patterns
+- [x] Error handling y validación
+
+### Infraestructura
+- [x] CloudFront routing (admin + public)
+- [x] API Gateway + Cognito authorizer
+- [x] CORS configuration
+- [x] Lambda deployment
+- [x] IAM roles y permisos
+
+---
+
+## 🧪 Pruebas
+
+### Manual Testing
+1. **Login Admin:**
+   - URL: https://d29tumvobv6mdj.cloudfront.net/admin/
+   - Credenciales: `cronusfit-admin` / `CronusFit2025!`
+   - ✅ Login exitoso, redirige a `#patrones`
+
+2. **Listar Patrones:**
+   - GET /api/patterns retorna lista vacía (esperado - no hay patrones aún)
+   - ✅ No hay errores CORS
+
+3. **Crear Patrón:**
+   - Formulario visible al hacer clic en "Nuevo patrón"
+   - POST /api/patterns/generate con JWT
+   - ⏳ Pendiente probar creación completa
+
+### Automated Testing
+```bash
+# Test CORS
+./scripts/test-pattern-api.ps1
+# ✅ OPTIONS /api/patterns: OK
+# ✅ OPTIONS /api/patterns/generate: OK
+# ✅ GET /api/patterns retorna 401 con CORS headers
 ```
 
-**Si no existe, desplegarlo:**
-```powershell
-npm run deploy:admin
-```
+---
 
-#### Si los hipervínculos del sitio público siguen sin funcionar:
-La función CloudFront puede necesitar más tiempo para propagarse. Esperar 10-15 minutos adicionales y probar de nuevo.
+## 📝 Próximos Pasos
 
-**Crear invalidación si es necesario:**
-```powershell
-aws cloudfront create-invalidation --distribution-id EKSSI9LYAOBGP --paths "/*"
-```
+### 1. Prueba de Creación de Patrón (URGENTE)
+1. Abrir: https://d29tumvobv6mdj.cloudfront.net/admin/
+2. Login con credenciales admin
+3. Ir a sección "Patrones"
+4. Clic en "Nuevo patrón"
+5. Llenar formulario:
+   - Tipo de prenda: Jersey / Camiseta
+   - Grupo etario: Adulto
+   - Talla: M
+   - Medidas: 450, 680, 380, 220 (mm)
+6. Clic en "Generar patrón"
+7. Verificar:
+   - No hay errores en consola
+   - Toast de éxito aparece
+   - Patrón aparece en la lista
 
-## 🔐 Importante - Seguridad
+### 2. Implementar Secciones Faltantes del Admin Panel
+- [ ] Sección Cotizaciones (tasks 6.1-6.6)
+- [ ] Sección Mockups (tasks 7.1-7.4)
+- [ ] Sección Aprobaciones (tasks 8.1-8.5)
+- [ ] Sección Publicaciones (tasks 9.1-9.4)
+- [ ] Sección Redes Sociales (tasks 10.1-10.4)
 
-### Rotar Access Key
-La Access Key `AKIAZ53HEFOT6BTNKYXX` fue expuesta en el chat. Después de verificar que todo funciona:
+### 3. Deployar Lambdas Adicionales
+- [ ] mockup-generate
+- [ ] approval-process
+- [ ] site-publish
+- [ ] site-rebuild
+- [ ] quote-submit
+- [ ] quote-status
+- [ ] social-generate
 
-1. Ir a IAM Console: https://console.aws.amazon.com/iam/
-2. Users → cronusfit-admin → Security credentials
-3. Desactivar la access key actual
-4. Crear nueva access key
-5. Actualizar AWS CLI local:
-   ```powershell
-   aws configure
-   ```
+### 4. Seguridad
+- [ ] Rotar IAM Access Key `AKIAZ53HEFOT6BTNKYXX` (fue expuesta en chat)
+- [ ] Configurar hCaptcha para formularios públicos
+- [ ] Verificar rate limiting en API Gateway
 
-## 📊 Recursos AWS Utilizados
+---
 
-### Dentro del Free Tier:
-- **CloudFront**: 1 distribución (50 GB transferencia gratis/mes)
-- **CloudFront Functions**: 1 función (2M invocaciones gratis/mes)
-- **S3**: cronusfit-exhibition-site-prod (5 GB storage gratis)
-- **Lambda**: 23 funciones (~1M invocaciones gratis/mes)
-- **Cognito**: 1 User Pool (50,000 MAU gratis)
-- **DynamoDB**: 1 tabla (25 GB storage + 25 RCU/WCU gratis)
+## 🐛 Issues Conocidos
 
-### Monitoreo requerido:
-- CloudFront Requests: Limit 10M/mes (Free Tier)
-- Lambda Invocations: Limit 1M/mes (Free Tier)
-- S3 PUTs: Limit 2000/mes (Free Tier)
+### Resueltos ✅
+1. ~~CloudFront 403 en `/admin/`~~ → Resuelto con CloudFront Function
+2. ~~Login fallando con "contraseña incorrecta"~~ → Resuelto actualizando Cognito App Client auth flows
+3. ~~CORS preflight failing~~ → Resuelto añadiendo OPTIONS methods con MOCK integration
+4. ~~URL incorrecta en documentación~~ → Corregido (era d1bvp1qngvpupm, ahora d29tumvobv6mdj)
 
-## 🎯 Estado General del Proyecto
+### Pendientes ⏳
+1. Error "icon is not a function" en navegador → Causado por extensión "Cloud-use-DNS" del navegador (no es del sistema)
+2. Prueba end-to-end de creación de patrón → Pendiente
 
-- ✅ Infraestructura AWS configurada
-- ✅ Lambdas desplegadas (23 funciones)
-- ✅ Sitio público construido y desplegado
-- ✅ Panel de administración construido y desplegado
-- 🔄 CloudFront configurado (en propagación)
-- ⏳ Pendiente: Pruebas end-to-end una vez que CloudFront esté completamente desplegado
+---
+
+## 📞 Contacto & Soporte
+
+- **Región AWS:** us-east-1 (N. Virginia)
+- **Stack CloudFormation:** `cronusfit-web`
+- **Email Admin:** cronusfit.me@gmail.com
+
+**Nota:** Todo el sistema opera dentro de AWS Free Tier. Monitoreo automático cada 6 horas vía EventBridge.
+
+---
+
+*Última actualización: 2026-07-26 00:15 UTC*

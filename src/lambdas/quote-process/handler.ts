@@ -48,13 +48,26 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
       return errorResponse(400, 'Invalid JSON in request body');
     }
 
-    // Build pricing input
+    // Normalize pricing input from the admin UI.
+    const rawPrice = body.price as number | undefined;
+    const rawUnitPrice = body.unitPrice as number | undefined;
+    const rawTotalPrice = body.totalPrice as number | undefined;
+
+    const unitPrice = rawUnitPrice ?? rawPrice;
+    const totalPrice = rawTotalPrice ?? rawPrice;
+
+    const defaultValidUntil = () => {
+      const date = new Date();
+      date.setDate(date.getDate() + 7);
+      return date.toISOString();
+    };
+
     const input: QuotePriceInput = {
       quoteId,
-      unitPrice: body.unitPrice as number,
-      totalPrice: body.totalPrice as number,
+      unitPrice: typeof unitPrice === 'number' ? unitPrice : 0,
+      totalPrice: typeof totalPrice === 'number' ? totalPrice : 0,
       currency: (body.currency as string) ?? 'COP',
-      validUntil: body.validUntil as string,
+      validUntil: (body.validUntil as string) ?? defaultValidUntil(),
       notes: body.notes as string | undefined,
     };
 

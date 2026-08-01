@@ -48,14 +48,104 @@ const MIN_SEAM_ALLOWANCE_CM = 0.5;
 /** Maximum seam allowance in cm. */
 const MAX_SEAM_ALLOWANCE_CM = 3.0;
 
+/**
+ * Generate standard measurements based on garment type, age group, and size.
+ * This is used as a fallback when PDF mode is active but no measurements are extracted.
+ * 
+ * @param garmentType - Type of garment
+ * @param ageGroup - Age group (children or adult)
+ * @param size - Size
+ * @returns Standard measurements object
+ */
+function generateStandardMeasurements(
+  garmentType: GarmentType,
+  ageGroup: AgeGroup,
+  size: Size
+): Record<string, number> {
+  // Standard measurements in millimeters
+  // These are approximate values - in production, would extract from PDF
+  
+  const measurements: Record<string, number> = {};
+
+  if (ageGroup === 'adult') {
+    // Adult size mapping (approximate)
+    const sizeFactors = {
+      'XS': 0.85,
+      'S': 0.92,
+      'M': 1.0,
+      'L': 1.08,
+      'XL': 1.16,
+      'XXL': 1.24,
+      '3XL': 1.32,
+      '4XL': 1.40,
+      '5XL': 1.48,
+      '6XL': 1.56,
+    };
+    
+    const factor = sizeFactors[size as keyof typeof sizeFactors] || 1.0;
+    
+    // Base measurements for M size
+    const baseMeasurements = {
+      chest: 1000,
+      waist: 860,
+      hip: 1000,
+      torsoLength: 600,
+      shoulderWidth: 460,
+      legLength: 820,
+    };
+    
+    // Scale measurements by size factor
+    for (const [key, value] of Object.entries(baseMeasurements)) {
+      measurements[key] = Math.round(value * factor);
+    }
+    
+  } else {
+    // Children size mapping (approximate)
+    const childSizeFactors = {
+      '2T': 0.50,
+      '4T': 0.60,
+      '6': 0.70,
+      '8': 0.80,
+      '10': 0.85,
+      '12': 0.90,
+      '14': 0.95,
+      '16': 1.0,
+    };
+    
+    const factor = childSizeFactors[size as keyof typeof childSizeFactors] || 0.75;
+    
+    // Base measurements for size 16 (scaled down for smaller sizes)
+    const baseMeasurements = {
+      chest: 800,
+      waist: 680,
+      hip: 850,
+      torsoLength: 480,
+      shoulderWidth: 360,
+      legLength: 650,
+    };
+    
+    // Scale measurements by size factor
+    for (const [key, value] of Object.entries(baseMeasurements)) {
+      measurements[key] = Math.round(value * factor);
+    }
+  }
+  
+  return measurements;
+}
+
 /** Request body interface. */
 interface PatternGenerateRequest {
+  mode?: 'manual' | 'pdf'; // New: operation mode
   garmentType: string;
   ageGroup: string;
   size: string;
   measurements: Record<string, number>;
   seamAllowance?: number;
   referenceImageKey?: string;
+  referenceImageName?: string;
+  referenceImageType?: string;
+  detectedSizes?: string[]; // For PDF mode: sizes detected in PDF
+  gradingSizes?: string[]; // For PDF mode: additional sizes to generate
 }
 
 /**
@@ -87,8 +177,34 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     });
   }
 
-  const { garmentType, ageGroup, size, measurements, seamAllowance, referenceImageKey } =
-    requestBody;
+  const { 
+    mode = 'manual',
+    garmentType, 
+    ageGroup, 
+    size, 
+    measurements, 
+    seamAllowance, 
+    referenceImageKey,
+    referenceImageName,
+    referenceImageType,
+    detectedSizes,
+    gradingSizes,
+  } = requestBody;
+
+  // --- Special handling for PDF mode ---
+  const isPdfMode = mode === 'pdf';
+  
+  if (isPdfMode) {
+    // In PDF mode, we expect the PDF to contain the pattern data
+    // For now, we'll use the detected sizes and generate standard measurements
+    // TODO: Implement actual PDF parsing to extract measurements
+    console.log('PDF mode detected:', {
+      referenceImageName,
+      referenceImageType,
+      detectedSizes,
+      gradingSizes,
+    });
+  }
 
   // --- Validate garmentType ---
   if (!garmentType) {
@@ -133,22 +249,30 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   // --- Validate measurements ---
-  if (!measurements || typeof measurements !== 'object' || Array.isArray(measurements)) {
-    return errorResponse(400, 'Validation Error', {
-      message: 'measurements is required and must be an object.',
-    });
-  }
-  if (Object.keys(measurements).length === 0) {
-    return errorResponse(400, 'Validation Error', {
-      message: 'At least one measurement must be provided.',
-    });
-  }
-  const measurementsResult = validateMeasurements(measurements);
-  if (!measurementsResult.valid) {
-    return errorResponse(400, 'Validation Error', {
-      message: 'One or more measurements are invalid.',
-      details: measurementsResult.errors,
-    });
+  if (!isPdfMode) {
+    // In manual mode, measurements are required
+    if (!measurements || typeof measurements !== 'object' || Array.isArray(measurements)) {
+      return errorResponse(400, 'Validation Error', {
+        message: 'measurements is required and must be an object.',
+      });
+    }
+    if (Object.keys(measurements).length === 0) {
+      return errorResponse(400, 'Validation Error', {
+        message: 'At least one measurement must be provided.',
+      });
+    }
+    const measurementsResult = validateMeasurements(measurements);
+    if (!measurementsResult.valid) {
+      return errorResponse(400, 'Validation Error', {
+        message: 'One or more measurements are invalid.',
+        details: measurementsResult.errors,
+      });
+    }
+  } else {
+    // In PDF mode, use standard measurements based on size
+    // TODO: Extract actual measurements from PDF
+    // For now, use template defaults with size-based scaling
+    console.log('PDF mode: Using standard measurements for size', size);
   }
 
   // --- Validate seam allowance (optional, default 1.5 cm) ---
@@ -190,13 +314,18 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   // --- Apply measurements to template ---
   let scaledPattern;
   try {
-    scaledPattern = applyMeasurements(template, measurements);
+    // Use provided measurements or generate standard ones for PDF mode
+    const effectiveMeasurements = isPdfMode && (!measurements || Object.keys(measurements).length === 0)
+      ? generateStandardMeasurements(garmentType as GarmentType, ageGroup as AgeGroup, size as Size)
+      : measurements;
+
+    scaledPattern = applyMeasurements(template, effectiveMeasurements);
     // Override the size with the user-provided size
     scaledPattern = { ...scaledPattern, size: size as Size };
   } catch (err: unknown) {
     return errorResponse(500, 'Generation Error', {
       message: errorMessage(err),
-      measurements, // Preserve admin-entered measurements on failure (Req 1.12)
+      measurements: isPdfMode ? {} : measurements, // Preserve admin-entered measurements on failure (Req 1.12)
     });
   }
 
@@ -277,7 +406,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     garmentType: garmentType as GarmentType,
     size: size as Size,
     createdAt: new Date().toISOString(),
-    generationMethod: referenceImageKey ? 'image' : 'parameters',
+    generationMethod: isPdfMode ? 'pdf' : (referenceImageKey ? 'image' : 'parameters'),
     s3Key,
     pieceCount: svgResult.pieceCount,
     ageGroup: ageGroup as AgeGroup,

@@ -1,7 +1,7 @@
 /**
  * Quote Submit Lambda Handler
  *
- * POST /api/quotes — public endpoint (CAPTCHA + rate limit, no JWT)
+ * POST /quotes — public endpoint (CAPTCHA + rate limit, no JWT)
  *
  * Thin wrapper that:
  * 1. Extracts client IP from X-Forwarded-For

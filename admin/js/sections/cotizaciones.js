@@ -36,7 +36,7 @@ const CotizacionesSection = {
     `;
 
     try {
-      const data = await Api.get('/quotes');
+      const data = await Api.get('/api/quotes');
       // Sort by receivedAt descending
       CotizacionesSection._quotes = (data || []).sort(
         (a, b) => new Date(b.receivedAt) - new Date(a.receivedAt)
@@ -302,7 +302,7 @@ const CotizacionesSection = {
     const prevStatus = prevQuote?.status;
 
     try {
-      await Api.put(`/quotes/${id}`, { price, status: 'quoted' });
+      await Api.post(`/api/quotes/${id}/price`, { price });
       // Update local state
       if (prevQuote) { prevQuote.status = 'quoted'; prevQuote.price = price; }
       Toast.success('Cotización actualizada con el precio enviado.');

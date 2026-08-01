@@ -26,14 +26,15 @@ const MockupsSection = {
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
           </svg>
-          <span class="text-sm">Cargando patrones aprobados...</span>
+          <span class="text-sm">Cargando patrones...</span>
         </div>
       </div>
     `;
 
     try {
-      const data = await Api.get('/api/patterns?status=approved');
-      MockupsSection._patterns = (data || []).filter(p => p.status === 'approved');
+      const data = await Api.get('/api/patterns');
+      const list = Array.isArray(data) ? data : (data?.patterns ?? []);
+      MockupsSection._patterns = list;
     } catch (err) {
       Toast.error(`Error al cargar patrones: ${err.message ?? 'Error desconocido'}`);
       appContent.innerHTML = `
@@ -55,8 +56,7 @@ const MockupsSection = {
             (${MockupsSection._formatAgeGroup(p.ageGroup)} · ${MockupsSection._esc(p.size)})
           </option>
         `).join('')
-      : '<option value="" disabled>No hay patrones aprobados disponibles</option>';
-
+      : '<option value="" disabled>No hay patrones disponibles — crea uno en la sección Patrones</option>';
     container.innerHTML = `
       <div class="max-w-2xl mx-auto">
         <h2 class="text-xl font-bold text-brand-blue mb-6">Generar mockup</h2>
@@ -254,9 +254,9 @@ const MockupsSection = {
 
     if (btn)     btn.disabled = true;
     if (spinner) spinner.classList.remove('hidden');
-    if (btnText) btnText.textContent = 'Generando mockup...';
+    if (btnText) btnText.textContent = 'Subiendo diseño...';
 
-    // Convert file to base64 for API payload
+    // Convert file to base64 for upload
     let designFileBase64;
     try {
       designFileBase64 = await MockupsSection._fileToBase64(file);
@@ -269,19 +269,50 @@ const MockupsSection = {
     }
 
     try {
+      // PASO 1: Subir archivo de diseño a S3
+      let designFileKey;
+      try {
+        const uploadResult = await Api.post('/api/designs/upload', {
+          fileName: file.name,
+          fileType: file.type,
+          fileContent: designFileBase64,
+        });
+        if (!uploadResult || !uploadResult.designFileKey) {
+          throw new Error('El servidor no devolvió la clave del archivo');
+        }
+        designFileKey = uploadResult.designFileKey;
+      } catch (uploadErr) {
+        const msg = uploadErr?.message ?? uploadErr?.error ?? 'Error desconocido al subir diseño';
+        Toast.error(`Error al subir diseño: ${msg}`);
+        console.error('[Mockup] Upload error:', uploadErr);
+        return;
+      }
+
+      // PASO 2: Generar mockup usando la referencia S3
+      if (btnText) btnText.textContent = 'Generando mockup...';
+
+      // Obtener garmentType del patrón seleccionado
+      const selectedPattern = MockupsSection._patterns.find(p => p.id === patternId);
+      const garmentType = selectedPattern?.garmentType ?? 'camiseta';
+
       const result = await Api.post('/api/mockups/generate', {
         patternId,
-        zone,
-        designFile: designFileBase64,
-        designFileType: file.type,
-        designFileName: file.name,
+        garmentType,
+        placementZone: zone,
+        designFileKey,
       });
 
-      // Render result images
-      MockupsSection._renderResult(result);
+      // Render result images — API returns frontImageUrl / backImageUrl
+      const mappedResult = {
+        frontUrl: result.frontImageUrl ?? result.frontUrl,
+        backUrl:  result.backImageUrl  ?? result.backUrl,
+      };
+      MockupsSection._renderResult(mappedResult);
       Toast.success('Mockup generado correctamente. Estado: Pendiente de aprobación.');
     } catch (err) {
-      Toast.error(`Error al generar mockup: ${err.message ?? 'Error desconocido'}`);
+      const msg = err?.message ?? err?.error ?? 'Error desconocido';
+      Toast.error(`Error al generar mockup: ${msg}`);
+      console.error('[Mockup] Generate error:', err);
       // Keep form values intact — only re-enable button
     } finally {
       if (btn)     btn.disabled = false;

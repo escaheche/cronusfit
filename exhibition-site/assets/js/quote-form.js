@@ -11,7 +11,7 @@
   'use strict';
 
   // Configuration
-  var QUOTE_API_URL = '/api/quotes';
+  var QUOTE_API_URL = 'https://dp5pdbigb1.execute-api.us-east-1.amazonaws.com/prod/quotes';
   var SUBMIT_TIMEOUT_MS = 30000;
 
   // State

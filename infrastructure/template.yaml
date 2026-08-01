@@ -772,6 +772,28 @@ Resources:
   # ============================================================
   # Lambda Functions - Quote Admin (Cognito-protected)
   # ============================================================
+  QuoteListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub cronusfit-quote-list-${Environment}
+      Handler: handler.handler
+      CodeUri: ../dist/lambdas/quote-list/
+      Description: Retrieves quote list for the admin panel (JWT-protected)
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetQuoteList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ExhibitionApi
+            Path: /api/quotes
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+
   QuoteProcessFunction:
     Type: AWS::Serverless::Function
     Properties:

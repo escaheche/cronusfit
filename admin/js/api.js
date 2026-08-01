@@ -45,10 +45,11 @@ const Api = {
     // 4xx / 5xx — parse error details and throw
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      const err = new Error(data.message ?? res.statusText);
+      const err = new Error(data.message ?? data.error ?? res.statusText);
       err.status = res.status;
+      err.error = data.error;
       // NOTE: JWT is intentionally excluded from this log
-      console.error(`[API] ${method} ${path} → ${res.status} ${new Date().toISOString()}`);
+      console.error(`[API] ${method} ${path} → ${res.status} ${new Date().toISOString()}`, data);
       throw err;
     }
 

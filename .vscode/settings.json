@@ -1,3 +1,13 @@
 {
-    "html.autoClosingTags": false
+    "html.autoClosingTags": false,
+    "chat.mcp.serverSampling": {
+        "cronusfit web/.vscode/mcp.json: ollama": {
+            "allowedModels": [
+                "copilotcli/auto",
+                "copilot/auto",
+                "agent-host-copilotcli:ollama/qwen2.5-coder:7b-ctx8k",
+                "ollama/Ollama (Deprecated)/qwen2.5-coder:7b-ctx8k"
+            ]
+        }
+    }
 }

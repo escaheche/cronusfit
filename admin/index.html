@@ -5,14 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
-    script-src 'self' https://cdn.jsdelivr.net;
-    connect-src 'self'
+    script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+    worker-src 'self' blob: https://cdn.jsdelivr.net;
+    connect-src 'self' blob:
+      https://cdn.jsdelivr.net
       https://dp5pdbigb1.execute-api.us-east-1.amazonaws.com
       https://cognito-idp.us-east-1.amazonaws.com
       https://cognito-identity.us-east-1.amazonaws.com;
-    style-src 'self' https://fonts.googleapis.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com;
-    img-src 'self' data: blob: https://cronusfit-exhibition-site-prod.s3.amazonaws.com;
+    img-src 'self' data: blob: https://cronusfit-exhibition-site-prod.s3.amazonaws.com https://cronusfit-exhibition-site-prod.s3.us-east-1.amazonaws.com;
   ">
   <title>CronusFit — Panel de Administración</title>
   <link rel="stylesheet" href="css/admin.css">
@@ -183,6 +185,14 @@
   <!-- jsPDF v2.5.1 -->
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"
           integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk"
+          crossorigin="anonymous"></script>
+
+  <!-- PDF.js v3.11.174 (for PDF rendering) -->
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"
+          crossorigin="anonymous"></script>
+
+  <!-- Tesseract.js v4.1.1 (for OCR) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"
           crossorigin="anonymous"></script>
 
   <!-- ===================== APPLICATION MODULES (load order matters) ===================== -->

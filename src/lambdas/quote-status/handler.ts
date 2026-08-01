@@ -1,7 +1,7 @@
 /**
  * Quote Status Lambda Handler
  *
- * GET /api/quotes/{trackingNumber}/status — public endpoint (CAPTCHA + rate limit, no JWT)
+ * GET /quotes/{trackingNumber}/status — public endpoint (CAPTCHA + rate limit, no JWT)
  *
  * Allows clients to look up the status of their quote submission using
  * the tracking number provided at submission time.
