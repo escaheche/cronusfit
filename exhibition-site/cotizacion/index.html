@@ -9,209 +9,376 @@ layout: false
   <title>Solicitar Cotización - CronusFit</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
-  <header class="bg-blue-900 text-white p-4">
-    <div class="container mx-auto flex justify-between items-center">
-      <a href="/" class="text-xl font-bold">CronusFit</a>
-      <nav class="space-x-4 text-sm">
-        <a href="/" class="hover:underline">Inicio</a>
-        <a href="/products/" class="hover:underline">Productos</a>
-        <a href="/cotizacion/" class="font-semibold underline">Cotización</a>
-        <a href="/estado/" class="hover:underline">Estado</a>
-      </nav>
+  <!-- Header -->
+  <header class="bg-blue-900 text-white shadow-lg">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="flex items-center mb-4 md:mb-0">
+          <h1 class="text-2xl font-bold">CronusFit</h1>
+        </div>
+        <nav class="flex space-x-6 text-sm">
+          <a href="/" class="hover:text-blue-200 transition">Inicio</a>
+          <a href="/products/" class="hover:text-blue-200 transition">Productos</a>
+          <a href="/cotizacion/" class="font-semibold underline">Cotización</a>
+          <a href="/estado/" class="hover:text-blue-200 transition">Estado</a>
+        </nav>
+      </div>
     </div>
   </header>
 
-  <main class="flex-grow container mx-auto px-4 py-8 max-w-2xl">
+  <!-- Main Content -->
+  <main class="flex-grow container mx-auto px-4 py-8 max-w-3xl">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Solicitar Cotización</h1>
     
-    <div id="successMessage" class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+    <!-- Success Message -->
+    <div id="successMessage" class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
       <p class="font-bold">¡Solicitud enviada con éxito!</p>
-      <p>Tu número de seguimiento es: <span id="trackingNumber" class="font-mono font-bold"></span></p>
-      <p class="text-sm mt-2">Te hemos enviado un correo de confirmación.</p>
+      <p class="mt-2">Tu número de seguimiento es: <span id="trackingNumber" class="font-mono font-bold text-lg"></span></p>
+      <p class="text-sm mt-2">Te hemos enviado un correo de confirmación. Puedes consultar el estado en la página de Estado.</p>
+      <a href="/estado/" class="inline-block mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Consultar Estado</a>
     </div>
 
-    <div id="errorMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+    <!-- Error Message -->
+    <div id="errorMessage" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
       <p class="font-bold">Error</p>
-      <p id="errorText" class="text-sm"></p>
+      <p id="errorText" class="text-sm mt-1"></p>
     </div>
 
-    <form id="quoteForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 space-y-4">
+    <!-- Quote Form -->
+    <form id="quoteForm" class="bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4 space-y-6">
+      
+      <!-- Nombre -->
       <div>
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="clientName">Nombre completo</label>
-        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="clientName" name="clientName" type="text" required>
+        <label class="block text-gray-700 text-sm font-semibold mb-2" for="clientName">
+          Nombre completo <span class="text-red-500">*</span>
+        </label>
+        <input 
+          class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+          id="clientName" 
+          name="clientName" 
+          type="text" 
+          placeholder="Tu nombre completo"
+          required
+        >
       </div>
 
+      <!-- Email y Teléfono -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Correo electrónico</label>
-          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="email" name="email" type="email" required>
+          <label class="block text-gray-700 text-sm font-semibold mb-2" for="email">
+            Correo electrónico <span class="text-red-500">*</span>
+          </label>
+          <input 
+            class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+            id="email" 
+            name="email" 
+            type="email" 
+            placeholder="tu@email.com"
+            required
+          >
         </div>
         <div>
-          <label class="block text-gray-700 text-sm font-bold mb-2" for="phone">Teléfono (WhatsApp)</label>
-          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="phone" name="phone" type="tel" placeholder="+56 9 1234 5678" required>
+          <label class="block text-gray-700 text-sm font-semibold mb-2" for="phone">
+            Teléfono (WhatsApp) <span class="text-red-500">*</span>
+          </label>
+          <input 
+            class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+            id="phone" 
+            name="phone" 
+            type="tel" 
+            placeholder="+56 9 1234 5678"
+            required
+          >
         </div>
       </div>
 
+      <!-- Producto -->
       <div>
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="productId">Producto de interés</label>
-        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="productId" name="productId" type="text" placeholder="Ej: Camiseta deportiva" required>
+        <label class="block text-gray-700 text-sm font-semibold mb-2" for="productId">
+          Producto de interés <span class="text-red-500">*</span>
+        </label>
+        <input 
+          class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+          id="productId" 
+          name="productId" 
+          type="text" 
+          placeholder="Ej: Camiseta deportiva sublimada"
+          required
+        >
       </div>
 
+      <!-- Cantidad y Grupo Etario -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-gray-700 text-sm font-bold mb-2" for="quantity">Cantidad</label>
-          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="quantity" name="quantity" type="number" min="1" required>
+          <label class="block text-gray-700 text-sm font-semibold mb-2" for="quantity">
+            Cantidad <span class="text-red-500">*</span>
+          </label>
+          <input 
+            class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+            id="quantity" 
+            name="quantity" 
+            type="number" 
+            min="1" 
+            max="10000"
+            placeholder="10"
+            required
+          >
         </div>
         <div>
-          <label class="block text-gray-700 text-sm font-bold mb-2" for="ageGroup">Grupo etario</label>
-          <select class="shadow border rounded w-full py-2 px-3 text-gray-700" id="ageGroup" name="ageGroup" required>
-            <option value="">Selecciona</option>
+          <label class="block text-gray-700 text-sm font-semibold mb-2" for="ageGroup">
+            Grupo etario <span class="text-red-500">*</span>
+          </label>
+          <select 
+            class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+            id="ageGroup" 
+            name="ageGroup" 
+            required
+          >
+            <option value="">Selecciona un grupo</option>
             <option value="adult">Adulto</option>
             <option value="children">Infantil</option>
           </select>
         </div>
       </div>
 
+      <!-- Tallas -->
       <div>
-        <label class="block text-gray-700 text-sm font-bold mb-2">Tallas (Ctrl+click para múltiples)</label>
-        <select class="shadow border rounded w-full py-2 px-3 text-gray-700" id="sizes" name="sizes" multiple size="4" required>
+        <label class="block text-gray-700 text-sm font-semibold mb-2">
+          Tallas deseadas <span class="text-red-500">*</span>
+          <span class="text-xs text-gray-500 font-normal ml-2">(Ctrl+click para seleccionar múltiples)</span>
+        </label>
+        <select 
+          class="shadow-sm border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+          id="sizes" 
+          name="sizes" 
+          multiple 
+          size="5"
+          required
+        >
           <option value="XS">XS</option>
           <option value="S">S</option>
           <option value="M">M</option>
           <option value="L">L</option>
           <option value="XL">XL</option>
           <option value="XXL">XXL</option>
+          <option value="3XL">3XL</option>
+          <option value="4XL">4XL</option>
           <option value="2T">2T (Infantil)</option>
           <option value="4T">4T (Infantil)</option>
           <option value="6">6 (Infantil)</option>
           <option value="8">8 (Infantil)</option>
+          <option value="10">10 (Infantil)</option>
+          <option value="12">12 (Infantil)</option>
+          <option value="14">14 (Infantil)</option>
+          <option value="16">16 (Infantil)</option>
         </select>
+        <p class="text-xs text-gray-500 mt-1">Mantén presionada la tecla Ctrl (o Cmd en Mac) para seleccionar múltiples tallas.</p>
       </div>
 
+      <!-- Notas -->
       <div>
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="customizationNotes">Notas (opcional)</label>
-        <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="customizationNotes" name="customizationNotes" rows="3" maxlength="1000"></textarea>
+        <label class="block text-gray-700 text-sm font-semibold mb-2" for="customizationNotes">
+          Notas de personalización <span class="text-xs text-gray-500 font-normal">(opcional)</span>
+        </label>
+        <textarea 
+          class="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+          id="customizationNotes" 
+          name="customizationNotes" 
+          rows="3" 
+          maxlength="1000"
+          placeholder="Describe tus requisitos de diseño, colores, logos, etc."
+        ></textarea>
+        <p class="text-xs text-gray-500 text-right mt-1"><span id="charCount">0</span>/1000</p>
       </div>
 
-      <!-- hCaptcha widget -->
-      <div class="my-4">
+      <!-- hCaptcha -->
+      <div class="my-6">
+        <label class="block text-gray-700 text-sm font-semibold mb-3">
+          Verificación de seguridad <span class="text-red-500">*</span>
+        </label>
         <div class="h-captcha" data-sitekey="3e2ae7d0-297c-4b58-8160-7546c482c552"></div>
+        <p class="text-xs text-gray-500 mt-2">Protegido por hCaptcha — <a href="https://www.hcaptcha.com/privacy" class="text-blue-600 hover:underline" target="_blank">Privacidad</a></p>
       </div>
 
-      <button id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full" type="submit">
-        Enviar Solicitud
-      </button>
-      <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+      <!-- Submit Button -->
+      <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+        <button 
+          id="submitBtn" 
+          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline w-full transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md" 
+          type="submit"
+        >
+          Enviar Solicitud
+        </button>
+      </div>
     </form>
   </main>
 
-  <footer class="bg-gray-800 text-white text-center py-4 text-sm">
-    <p>© 2026 CronusFit. Todos los derechos reservados.</p>
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white text-center py-6 mt-auto">
+    <div class="container mx-auto px-4">
+      <p class="text-sm">© 2026 CronusFit. Todos los derechos reservados.</p>
+      <p class="text-xs text-gray-400 mt-1">San Pedro de la Paz, Región del Biobío, Chile</p>
+    </div>
   </footer>
 
- <script>
-  // Esperar a que hCaptcha esté cargado
-  function waitForHCaptcha(callback, maxAttempts = 50) {
-    let attempts = 0;
-    const interval = setInterval(() => {
-      attempts++;
-      if (typeof hcaptcha !== 'undefined' && hcaptcha.getResponse) {
-        clearInterval(interval);
-        callback();
-      } else if (attempts >= maxAttempts) {
-        clearInterval(interval);
-        console.error('hCaptcha no se cargó después de 5 segundos');
-        const errorMsg = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
-        if (errorMsg && errorText) {
-          errorText.textContent = 'Error al cargar el CAPTCHA. Recarga la página e intenta de nuevo.';
-          errorMsg.classList.remove('hidden');
-        }
-      }
-    }, 100);
-  }
-
-  document.getElementById('quoteForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const submitBtn = document.getElementById('submitBtn');
-    const successMsg = document.getElementById('successMessage');
-    const errorMsg = document.getElementById('errorMessage');
-    const errorText = document.getElementById('errorText');
-    
-    successMsg.classList.add('hidden');
-    errorMsg.classList.add('hidden');
-    
-    // Verificar que hCaptcha está cargado
-    if (typeof hcaptcha === 'undefined') {
-      errorText.textContent = 'El CAPTCHA aún no está listo. Espera un momento e intenta de nuevo.';
-      errorMsg.classList.remove('hidden');
-      return;
-    }
-
-    // Obtener token de hCaptcha
-    let captchaToken;
-    try {
-      captchaToken = hcaptcha.getResponse();
-    } catch (error) {
-      console.error('Error al obtener token de hCaptcha:', error);
-      errorText.textContent = 'Error con el CAPTCHA. Recarga la página.';
-      errorMsg.classList.remove('hidden');
-      return;
-    }
-
-    if (!captchaToken) {
-      errorText.textContent = 'Por favor, completa el CAPTCHA';
-      errorMsg.classList.remove('hidden');
-      return;
-    }
-
-    // Obtener tallas seleccionadas
-    const sizesSelect = document.getElementById('sizes');
-    const selectedSizes = Array.from(sizesSelect.selectedOptions).map(opt => opt.value);
-
-    const payload = {
-      clientName: document.getElementById('clientName').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      productId: document.getElementById('productId').value.trim(),
-      quantity: parseInt(document.getElementById('quantity').value, 10),
-      ageGroup: document.getElementById('ageGroup').value,
-      sizes: selectedSizes,
-      customizationNotes: document.getElementById('customizationNotes').value.trim(),
-      captchaToken: captchaToken
-    };
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Enviando...';
-
-    try {
-      const response = await fetch('https://dp5pdbigb1.execute-api.us-east-1.amazonaws.com/prod/quotes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+  <!-- JavaScript -->
+  <script>
+    // Contador de caracteres para notas
+    const notesArea = document.getElementById('customizationNotes');
+    const charCount = document.getElementById('charCount');
+    if (notesArea && charCount) {
+      notesArea.addEventListener('input', () => {
+        charCount.textContent = notesArea.value.length;
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        document.getElementById('trackingNumber').textContent = data.trackingNumber;
-        successMsg.classList.remove('hidden');
-        document.getElementById('quoteForm').reset();
-        hcaptcha.reset();
-      } else {
-        throw new Error(data.message || 'Error al enviar');
-      }
-    } catch (error) {
-      errorText.textContent = error.message;
-      errorMsg.classList.remove('hidden');
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Enviar Solicitud';
     }
-  });
-</script>
+
+    // Esperar a que hCaptcha esté completamente cargado
+    function waitForHCaptcha(callback, maxAttempts = 50) {
+      let attempts = 0;
+      const interval = setInterval(() => {
+        attempts++;
+        if (typeof window.hcaptcha !== 'undefined' && typeof window.hcaptcha.getResponse === 'function') {
+          clearInterval(interval);
+          callback();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          console.error('hCaptcha no se cargó después de 5 segundos');
+          showError('Error al cargar el CAPTCHA. Recarga la página e intenta de nuevo.');
+        }
+      }, 100);
+    }
+
+    // Mostrar mensaje de error
+    function showError(message) {
+      const errorMsg = document.getElementById('errorMessage');
+      const errorText = document.getElementById('errorText');
+      if (errorMsg && errorText) {
+        errorText.textContent = message;
+        errorMsg.classList.remove('hidden');
+        setTimeout(() => {
+          errorMsg.classList.add('hidden');
+        }, 8000);
+      }
+    }
+
+    // Mostrar mensaje de éxito
+    function showSuccess(trackingNumber) {
+      const successMsg = document.getElementById('successMessage');
+      const trackingSpan = document.getElementById('trackingNumber');
+      if (successMsg && trackingSpan) {
+        trackingSpan.textContent = trackingNumber;
+        successMsg.classList.remove('hidden');
+        successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // Manejo del envío del formulario
+    document.getElementById('quoteForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const form = document.getElementById('quoteForm');
+      
+      // Ocultar mensajes previos
+      document.getElementById('errorMessage').classList.add('hidden');
+      document.getElementById('successMessage').classList.add('hidden');
+      
+      // Verificar que hCaptcha está cargado
+      if (typeof window.hcaptcha === 'undefined') {
+        showError('El CAPTCHA aún no está listo. Espera un momento e intenta de nuevo.');
+        return;
+      }
+
+      // Obtener token de hCaptcha
+      let captchaToken;
+      try {
+        captchaToken = window.hcaptcha.getResponse();
+      } catch (error) {
+        console.error('Error al obtener token de hCaptcha:', error);
+        showError('Error con el CAPTCHA. Recarga la página.');
+        return;
+      }
+
+      if (!captchaToken) {
+        showError('Por favor, completa el CAPTCHA');
+        return;
+      }
+
+      // Obtener tallas seleccionadas
+      const sizesSelect = document.getElementById('sizes');
+      const selectedSizes = Array.from(sizesSelect.selectedOptions).map(opt => opt.value);
+
+      if (selectedSizes.length === 0) {
+        showError('Por favor, selecciona al menos una talla');
+        return;
+      }
+
+      // Construir payload
+      const payload = {
+        clientName: document.getElementById('clientName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        productId: document.getElementById('productId').value.trim(),
+        quantity: parseInt(document.getElementById('quantity').value, 10),
+        ageGroup: document.getElementById('ageGroup').value,
+        sizes: selectedSizes,
+        customizationNotes: notesArea.value.trim(),
+        captchaToken: captchaToken
+      };
+
+      // Deshabilitar botón y mostrar estado de carga
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Enviando...';
+      submitBtn.classList.add('opacity-50');
+
+      try {
+        const response = await fetch('https://dp5pdbigb1.execute-api.us-east-1.amazonaws.com/prod/quotes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showSuccess(data.trackingNumber);
+          form.reset();
+          if (window.hcaptcha && typeof window.hcaptcha.reset === 'function') {
+            window.hcaptcha.reset();
+          }
+          if (charCount) {
+            charCount.textContent = '0';
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          throw new Error(data.message || data.errors || 'Error al enviar la cotización');
+        }
+      } catch (error) {
+        console.error('Error al enviar cotización:', error);
+        showError(error.message || 'Error al enviar la cotización. Inténtalo de nuevo.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Enviar Solicitud';
+        submitBtn.classList.remove('opacity-50');
+      }
+    });
+
+    // Verificar que hCaptcha esté listo cuando la página cargue
+    window.addEventListener('load', () => {
+      waitForHCaptcha(() => {
+        console.log('hCaptcha cargado correctamente');
+      });
+    });
+  </script>
 </body>
 </html>
