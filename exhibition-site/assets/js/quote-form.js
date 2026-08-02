@@ -1,5 +1,5 @@
 /**
- * CronusFit Quote Form
+ * CronusFit Quote Form - Versión mejorada con mejor manejo de hCaptcha
  */
 (function () {
   'use strict';
@@ -8,24 +8,20 @@
   var SUBMIT_TIMEOUT_MS = 30000;
   var captchaToken = null;
   var isSubmitting = false;
-  var form, submitBtn, successPanel, successMessage, errorBanner, errorBannerMessage, captchaUnavailablePanel;
+  var hcaptchaWidgetId = null;
+  var form, submitBtn, successPanel, successMessage, errorBanner, errorBannerMessage;
 
+  // Funciones de utilidad
   function sanitize(input) {
     if (!input) return '';
     var stripped = input.replace(/<[^>]*>/g, '');
-    stripped = stripped
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;');
-    return stripped;
+    return stripped.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
   }
 
-  function showFieldError(fieldId, messageKey) {
+  function showFieldError(fieldId, message) {
     var el = document.getElementById(fieldId);
     if (!el) return;
-    el.textContent = I18n ? I18n.t(messageKey) : messageKey;
+    el.textContent = message;
     el.classList.remove('hidden');
     var inputId = fieldId.replace('error-', 'quote-');
     var input = document.getElementById(inputId);
@@ -53,23 +49,24 @@
     if (errorBanner) errorBanner.classList.add('hidden');
   }
 
+  // Validación del formulario
   function validateForm() {
     var isValid = true;
     clearAllErrors();
 
     var name = document.getElementById('quote-name').value.trim();
     if (!name || name.length < 1 || name.length > 100) {
-      showFieldError('error-name', 'quote.error.required');
+      showFieldError('error-name', 'El nombre es obligatorio');
       isValid = false;
     }
 
     var email = document.getElementById('quote-email').value.trim();
     var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
-      showFieldError('error-email', 'quote.error.required');
+      showFieldError('error-email', 'El email es obligatorio');
       isValid = false;
     } else if (!emailRegex.test(email)) {
-      showFieldError('error-email', 'quote.error.email_invalid');
+      showFieldError('error-email', 'Email inválido');
       isValid = false;
     }
 
@@ -77,48 +74,49 @@
     var phoneDigits = phone.replace(/[\s\-()]/g, '');
     var phoneRegex = /^\+?\d{7,15}$/;
     if (!phone) {
-      showFieldError('error-phone', 'quote.error.required');
+      showFieldError('error-phone', 'El teléfono es obligatorio');
       isValid = false;
     } else if (!phoneRegex.test(phoneDigits)) {
-      showFieldError('error-phone', 'quote.error.phone_invalid');
+      showFieldError('error-phone', 'Teléfono inválido');
       isValid = false;
     }
 
     var productId = document.getElementById('quote-product').value.trim();
     if (!productId) {
-      showFieldError('error-product', 'quote.error.required');
+      showFieldError('error-product', 'El producto es obligatorio');
       isValid = false;
     }
 
     var quantity = parseInt(document.getElementById('quote-quantity').value, 10);
     if (isNaN(quantity) || quantity < 1 || quantity > 10000) {
-      showFieldError('error-quantity', 'quote.error.quantity_invalid');
+      showFieldError('error-quantity', 'Cantidad inválida');
       isValid = false;
     }
 
     var ageGroup = document.getElementById('quote-age-group').value;
     if (!ageGroup) {
-      showFieldError('error-age-group', 'quote.error.required');
+      showFieldError('error-age-group', 'Selecciona un grupo etario');
       isValid = false;
     }
 
     var selectedSizes = getSelectedSizes();
     if (selectedSizes.length === 0) {
-      showFieldError('error-sizes', 'quote.error.sizes_required');
+      showFieldError('error-sizes', 'Selecciona al menos una talla');
       isValid = false;
     }
 
-    // CRÍTICO: Obtener token de hCaptcha directamente
-    if (typeof hcaptcha !== 'undefined') {
-      try {
+    // CRÍTICO: Obtener token de hCaptcha
+    try {
+      if (typeof hcaptcha !== 'undefined') {
         captchaToken = hcaptcha.getResponse();
-      } catch (e) {
-        captchaToken = null;
       }
+    } catch (e) {
+      console.error('Error obteniendo token hCaptcha:', e);
+      captchaToken = null;
     }
     
     if (!captchaToken) {
-      showFieldError('error-captcha', 'quote.error.captcha');
+      showFieldError('error-captcha', 'Por favor completa la verificación CAPTCHA');
       isValid = false;
     }
 
@@ -153,7 +151,7 @@
     form.classList.add('hidden');
     if (errorBanner) errorBanner.classList.add('hidden');
     successPanel.classList.remove('hidden');
-    successMessage.textContent = '¡Solicitud enviada con éxito! Tu número de seguimiento es: ' + trackingNumber;
+    successMessage.textContent = '¡Solicitud enviada! Tu número de seguimiento es: ' + trackingNumber;
   }
 
   function showErrorBanner(message) {
@@ -165,7 +163,7 @@
 
   function resetCaptcha() {
     captchaToken = null;
-    if (typeof hcaptcha !== 'undefined') {
+    if (typeof hcaptcha !== 'undefined' && typeof hcaptcha.reset === 'function') {
       try {
         hcaptcha.reset();
       } catch (e) { /* ignore */ }
@@ -195,23 +193,6 @@
     clearFieldError('error-sizes');
   }
 
-  function prefillProductFromURL() {
-    var params = new URLSearchParams(window.location.search);
-    var productId = params.get('product');
-    if (productId) {
-      var input = document.getElementById('quote-product');
-      input.value = productId;
-    }
-  }
-
-  function updateCharCount() {
-    var notes = document.getElementById('quote-notes');
-    var count = document.getElementById('notes-char-count');
-    if (notes && count) {
-      count.textContent = notes.value.length;
-    }
-  }
-
   function submitForm() {
     if (isSubmitting) return;
     if (!validateForm()) return;
@@ -235,6 +216,8 @@
       delete payload.customizationNotes;
     }
 
+    console.log('Enviando cotización:', payload);
+
     var abortController = new AbortController();
     var timeoutId = setTimeout(function () {
       abortController.abort();
@@ -248,19 +231,17 @@
     })
       .then(function (response) {
         clearTimeout(timeoutId);
+        console.log('Respuesta API:', response.status);
         if (response.status === 201) {
           return response.json().then(function (data) {
             showSuccess(data.trackingNumber);
           });
         } else if (response.status === 429) {
-          return response.json().then(function (data) {
-            var retryAfter = data.retryAfterSeconds || 60;
-            showErrorBanner('Límite excedido. Intenta en ' + retryAfter + ' segundos');
-            resetCaptcha();
-          });
+          showErrorBanner('Demasiados intentos. Espera unos minutos.');
+          resetCaptcha();
         } else {
           return response.json().then(function (data) {
-            showErrorBanner('Error al enviar. Intenta de nuevo.');
+            showErrorBanner('Error: ' + (data.message || 'Intenta de nuevo'));
             resetCaptcha();
           }).catch(function () {
             showErrorBanner('Error al enviar. Intenta de nuevo.');
@@ -270,6 +251,7 @@
       })
       .catch(function (err) {
         clearTimeout(timeoutId);
+        console.error('Error en fetch:', err);
         showErrorBanner('Error de conexión. Verifica tu internet.');
         resetCaptcha();
       })
@@ -285,23 +267,42 @@
     successMessage = document.getElementById('quote-success-message');
     errorBanner = document.getElementById('quote-error-banner');
     errorBannerMessage = document.getElementById('quote-error-banner-message');
-    captchaUnavailablePanel = document.getElementById('captcha-unavailable');
 
-    if (!form) return;
+    if (!form) {
+      console.error('Formulario no encontrado');
+      return;
+    }
 
-    prefillProductFromURL();
+    // Pre-llenar producto desde URL
+    var params = new URLSearchParams(window.location.search);
+    var productId = params.get('product');
+    if (productId) {
+      var input = document.getElementById('quote-product');
+      if (input) input.value = productId;
+    }
 
+    // Age group change
     var ageGroupSelect = document.getElementById('quote-age-group');
-    ageGroupSelect.addEventListener('change', onAgeGroupChange);
+    if (ageGroupSelect) {
+      ageGroupSelect.addEventListener('change', onAgeGroupChange);
+    }
 
+    // Character counter
     var notesField = document.getElementById('quote-notes');
-    notesField.addEventListener('input', updateCharCount);
+    var notesCharCount = document.getElementById('notes-char-count');
+    if (notesField && notesCharCount) {
+      notesField.addEventListener('input', function () {
+        notesCharCount.textContent = notesField.value.length;
+      });
+    }
 
+    // Form submit
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       submitForm();
     });
 
+    // Clear errors on input
     var inputs = form.querySelectorAll('input, select, textarea');
     for (var i = 0; i < inputs.length; i++) {
       inputs[i].addEventListener('input', function () {
@@ -309,22 +310,42 @@
         clearFieldError(errorId);
       });
     }
+
+    // Verificar hCaptcha después de cargar
+    setTimeout(function checkHCaptcha() {
+      if (typeof hcaptcha !== 'undefined') {
+        console.log('hCaptcha cargado correctamente');
+        // Renderizar explícitamente si es necesario
+        if (!hcaptchaWidgetId) {
+          try {
+            hcaptchaWidgetId = hcaptcha.render('hcaptcha-widget', {
+              sitekey: '3e2ae7d0-297c-4b58-8160-7546c482c552',
+              callback: function (token) {
+                console.log('Token hCaptcha obtenido');
+                captchaToken = token;
+                clearFieldError('error-captcha');
+              },
+              'expired-callback': function () {
+                captchaToken = null;
+                showFieldError('error-captcha', 'El CAPTCHA expiró');
+              },
+              'error-callback': function () {
+                captchaToken = null;
+                showFieldError('error-captcha', 'Error con el CAPTCHA');
+              }
+            });
+          } catch (e) {
+            console.error('Error renderizando hCaptcha:', e);
+          }
+        }
+      } else {
+        console.warn('hCaptcha aún no cargado, reintentando...');
+        setTimeout(checkHCaptcha, 500);
+      }
+    }, 1000);
   }
 
-  // Callbacks globales para hCaptcha
-  window.onCaptchaSuccess = function (token) {
-    captchaToken = token;
-    clearFieldError('error-captcha');
-  };
-
-  window.onCaptchaExpired = function () {
-    captchaToken = null;
-  };
-
-  window.onCaptchaError = function () {
-    captchaToken = null;
-  };
-
+  // Inicializar
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
