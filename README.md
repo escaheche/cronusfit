@@ -10,7 +10,7 @@ Plataforma automatizada de catálogo y gestión para **CronusFit**, marca de rop
 |---------|-----|
 | Sitio público | https://d29tumvobv6mdj.cloudfront.net |
 | Panel Admin | https://d29tumvobv6mdj.cloudfront.net/admin/ |
-| API Gateway | https://dp5pdbigb1.execute-api.us-east-1.amazonaws.com/prod |
+
 
 **Credenciales Admin:** `cronusfit-admin` / `CronusFit2025!`
 
@@ -193,26 +193,21 @@ npm run deploy:admin              # Build CSS + sync S3 + invalidate CloudFront
 
 ### Recursos desplegados
 
-| Recurso | ID/Nombre |
+| Recurso | 
 |---------|-----------|
-| Stack CloudFormation | `cronusfit-web` |
-| S3 bucket | `cronusfit-exhibition-site-prod` |
-| CloudFront Distribution | `EKSSI9LYAOBGP` |
-| Cognito User Pool | `us-east-1_GOBIYDfqK` |
-| Cognito App Client | `7gfgmp718hi797qd5e4m1pk5ae` |
-| DynamoDB tabla | `CronusFit` |
-| SES email verificado | `cronusfit.me@gmail.com` |
-| Región | `us-east-1` |
+| Stack CloudFormation |
+| S3 bucket |
+| CloudFront Distribution | 
+| Cognito User Pool | 
+| Cognito App Client |
+| DynamoDB tabla | 
+| SES email verificado | 
+| Región |
 
 ### Variables de entorno Lambda
 
 Las Lambdas reciben automáticamente via SAM:
-- `TABLE_NAME=CronusFit`
-- `ENVIRONMENT=prod`
-- `S3_ASSETS_BUCKET=cronusfit-exhibition-site-prod`
-- `TEMPLATES_PATH=/var/task/templates/parametric` (pattern-generate, grade, serialize)
-- `ADMIN_EMAIL=cronusfit.me@gmail.com`
-- `SENDER_EMAIL=cronusfit.me@gmail.com`
+
 
 ### ⚠️ Pendiente configurar
 
